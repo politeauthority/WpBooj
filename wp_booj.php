@@ -1,75 +1,235 @@
 <?php
-/*
-Plugin Name: WP Booj
-Plugin URI: http://www.booj.com/
-Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: .09
-Author: Alix Fullerton
-Author URI: http://www.booj.com/
-Release Date: 2013-08-08 17:40
 
-This version currently supports; 
-- Enterprise Branding Footer
-- Removes "update nag screen" from all views. 
-- Fixes ALL admin url breaks that can come about in Apache proxies
-- Creates an "Enterprise Network Information" on the admin user profile page
+  /***********************************************************                                  
+     _ _ _     _____           _ 
+    | | | |___| __  |___ ___  |_|
+    | | | | . | __ -| . | . | | |
+    |_____|  _|_____|___|___|_| |
+          |_|               |___|
 
-@Usage
-	- Enterprise Network Informtion
-	    - Agent Bio Url : "get_the_author_meta( 'agent_bio_url', $user_id ) )"
-@Todo
-	- Add option to redirect off of Active-Clients.com URL ALWAYS
-*/
+  */
 
-define( 'WP_BOOJ_FILE', __FILE__ );
-define( 'WP_BOOJ_PATH', plugin_dir_path( __FILE__ ) );
-require WP_BOOJ_PATH . 'includes/WpBooj.php';
+class WpBooj {
 
-new WpBooj();
+  protected $option_name = 'wp-booj';
 
-/*
-	This section is only to override the wp_redirect section
-*/
+  // Default values
+  protected $data = array(
+      'proxy_admin_urls' => '0',
+  );
+  
+  function __construct(){
+    add_action( 'admin_init', array( $this, 'admin_init')              );
+    add_action( 'admin_init', array( $this, 'remove_nag' )             );
 
-$options = get_option( 'wp-booj' );
-if (! function_exists( 'wp_redirect' ) && $options['proxy_admin_urls'] == 'on' ) {
-	function wp_redirect($location, $status = 302) {
-		global $is_IIS;
+    add_action( 'admin_head', array( $this, 'booj_branding' )          );
+    add_action( 'admin_head', array( $this, 'proxy_admin_urls' )       );
+    add_action( 'admin_menu', array( $this, 'setting_menu' )           );
 
-		$location = apply_filters('wp_redirect', $location, $status);
-		$status   = apply_filters('wp_redirect_status', $status, $location);
+    add_action( 'wp_head',    array( $this, 'redirect_activeclients' ) );
 
-		if ( !$location ) // allows the wp_redirect filter to cancel a redirect
-		return false;
 
-		$location = wp_sanitize_redirect($location);
+    //Hooks for Author Meta
+    add_action( 'personal_options_update',  array( $this, 'booj_profile_fields_save' ) );
+    add_action( 'edit_user_profile_update', array( $this, 'booj_profile_fields_save' ) );
+    
+    add_action( 'show_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
+    add_action( 'edit_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
 
-		if ( !$is_IIS && php_sapi_name() != 'cgi-fcgi' )
-			status_header($status); // This causes problems on IIS and some FastCGI setups
+    // Listen for the plugin activate/deactivate event
+    register_activation_hook(   WP_BOOJ_FILE,   array( $this, 'activate' ) );
+    register_deactivation_hook( WP_BOOJ_FILE,   array( $this, 'deactivate' ) );
+  }
 
-		$uri_ext = '/' . WpBoojFindURISegment();
-		$uri_len = strlen( $uri_ext ) + 1;
-		if( substr( $location, 0, 1 ) == '/' && substr( $location, 0, $uri_len ) != $uri_ext ){
-		  $location = '/blog' . $location;
-		}
-		header("Location: $location", true, $status);
-	}	
+  public function activate() {
+    update_option( $this->option_name, $this->data );
+  }
+
+  public function deactivate() {
+    delete_option( $this->option_name );
+  }
+
+  public function admin_init(){
+    register_setting('todo_list_options', $this->option_name, array($this, 'validate'));
+  }
+
+  public function validate($input) {
+    $valid = array();
+    $valid['proxy_admin_urls'] = $input['proxy_admin_urls'];
+    return $valid;
+  }
+
+
+  /***********************************************************                        
+     _____           _ 
+    | __  |___ ___  |_|
+    | __ -| . | . | | |
+    |_____|___|___|_| |
+                  |___|
+
+    Basic Setup for the entire plugin
+
+  */
+
+  public function booj_branding(){
+    if( get_bloginfo('version') == '3.5.1' ){
+      ?>
+      <style type="text/css">
+        #footer-upgrade{
+          display: none;
+        }
+        #wpfooter{
+          background-image: url('<? print get_site_url(); ?>/wp-content/plugins/WpBooj/logo-enterprise-network.gif');
+          background-repeat: no-repeat;
+          background-position: right;
+        }
+      </style>
+      <?
+    }
+  }
+
+  public function setting_menu() {
+    // add_options_page( 'My Plugin Options', 'My Plugin', 'manage_options', 'my-unique-identifier', 'my_plugin_options' );
+    add_options_page( 'Booj Options', 'WpBooj', 'manage_options', 'wpbooj_options', array( $this, 'booj_options_page' ) );
+  }
+
+    //Booj Options Page
+  public function booj_options_page() {
+    if ( !current_user_can( 'manage_options' ) )  {
+      wp_die( __( 'You do not have sufficient permissions to access this pag!e.' ) );
+    }
+    $options = get_option($this->option_name);
+    ?>
+    <div class="wrap">
+      <?php screen_icon(); ?>
+      <h2>WpBooj</h2>
+      <p>If you don't understand these options, you will want to leave them as they are!</p>
+        <form method="post" action="options.php">
+          <?php settings_fields('todo_list_options'); ?>
+          <table class="form-table">
+            <tr valign="top"><th scope="row">Use Proxy Urls:</th>
+              <td><input type="checkbox" name="<?php echo $this->option_name?>[proxy_admin_urls]" <? if( $options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
+            </tr>
+          </table>
+          <p class="submit">
+            <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
+          </p>
+        </form>
+    </div>
+    <?
+  }
+
+
+  /***********************************************************                      
+     _____            _____                     
+    |   | |___ ___   |   __|___ ___ ___ ___ ___ 
+    | | | | .'| . |  |__   |  _|  _| -_| -_|   |
+    |_|___|__,|_  |  |_____|___|_| |___|___|_|_|
+              |___|                             
+
+    This removes the "Update Wordpress" nag screen from the Admin 
+
+  */
+
+  public function remove_nag($matches) {
+    remove_action('admin_notices', 'update_nag', 3);
+  }
+
+
+  /***********************************************************
+     _____  
+    |  |  |___| |___ 
+    |  |  |  _| |_ -|
+    |_____|_| |_|___|
+
+    This updates bad urls for the admin because of our Apache Proxy and stops users from access the active-clients.com location
+
+  */
+
+  public function redirect_activeclients(){
+    $options = get_option( $this->option_name );
+    if( $options['proxy_admin_urls'] == 'on' && ! isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ){
+      header( 'Location: ' . get_site_url() . '/' );   
+    }
+  }
+
+  public function proxy_admin_urls(){
+    // Update the HTTP_HOST because wordpress bases urls off of this
+    // We're removing 7 characters, 'http://' so the site_url MUST BE ex: http://www.clarkhawaii.com/
+    // @todo: Make this more robust for the above reason!
+    $options = get_option( $this->option_name );
+    if( $options['proxy_admin_urls'] == 'on' ){
+      if( substr( get_site_url(), 0, 7 ) == 'http://'){
+        $_SERVER['HTTP_HOST'] = substr( get_site_url(), 7 );
+      } else {
+        $_SERVER['HTTP_HOST'] = get_site_url() ;        
+      }
+
+        // This updates the remote_addr because of the proxy this would normally get lost
+      if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
+        $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $_SERVER['REMOTE_ADDR'] = trim($ips[0]);
+      } elseif ( isset($_SERVER['HTTP_X_REAL_IP']) && !empty($_SERVER['HTTP_X_REAL_IP']) ) {
+        $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_REAL_IP'];
+      } elseif ( isset($_SERVER['HTTP_CLIENT_IP']) && !empty($_SERVER['HTTP_CLIENT_IP']) ) {
+        $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CLIENT_IP'];
+      }
+
+      // Update the links we may have missed with this
+        // we catch all urls that start with "/" and put /blog/ ahead
+      ?>
+      <script type="text/javascript">
+        uri_segment = '<? echo WpBoojFindURISegment(); ?>';
+        uri_len     = uri_segment.length + 1;
+        jQuery(document).ready( function() {
+          jQuery('a').each( function(){
+            link = jQuery(this).attr('href');
+            if( link && link.length && link.substring( 0, 1 ) == '/' && link.substring( 0, uri_len ) != '/' +  uri_segment ){
+              jQuery(this).attr('href', '/' + uri_segment + link );
+            }
+          });
+          jQuery('form').each( function(){
+            action = jQuery(this).attr('action');
+            if( action && action.length && action.substring( 0, 1 ) == '/' && action.substring( 0, uri_len ) != '/' + uri_segment ){
+              jQuery(this).attr('action', '/' + uri_segment + action );
+            }
+          });
+        });
+      </script>
+      <?
+    }
+  }
+
+  /***********************************************************
+     _____     _   _              _____     _       
+    |  _  |_ _| |_| |_ ___ ___   |     |___| |_ ___ 
+    |     | | |  _|   | . |  _|  | | | | -_|  _| .'|
+    |__|__|___|_| |_|_|___|_|    |_|_|_|___|_| |__,|
+  
+    Add and display extra meta data for authors
+
+  */
+
+
+  function booj_profile_fields_admin_display( $user ) { 
+    ?>
+    <h3>Enterprise Network Information</h3>
+    <table class="form-table">
+      <tr>
+        <th><label for="twitter">Agent Bio Url</label></th>
+        <td>
+          <input type="text" name="agent_bio_url" id="agent_bio_url" value="<?php echo esc_attr( get_the_author_meta( 'agent_bio_url', $user->ID ) ); ?>" class="regular-text" /><br />
+          <span class="description">Please enter your agent bio page web address. (ex: http://www.clarkhawaii.com/our_agents/info/leslie-m-agorastos )</span>
+        </td>
+      </tr>
+    </table>
+    <? 
+  }
+
+
+  function booj_profile_fields_save( $user_id ) {
+    if ( !current_user_can( 'edit_user', $user_id ) )
+      return false;
+    update_usermeta( $user_id, 'agent_bio_url', $_POST['agent_bio_url'] );
+  }    
 }
-
-function WpBoojFindURISegment(){
-	$site_url =  get_site_url();
-	//Currently we're only going to support .com TLD
-	if ( strpos( $site_url, '.com' ) !== false ){
-		$exploded = explode( '.com', $site_url );
-		if( ! empty( $exploded[1] ) ){
-			$uri_segment = explode( '/', $exploded[1] );
-			$uri = $uri_segment[1];
-		} else{
-			$uri = '';
-		}
-	}
-	return $uri;
-}
-
-
-?>
