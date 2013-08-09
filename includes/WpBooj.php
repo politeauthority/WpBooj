@@ -1,6 +1,6 @@
 <?php
 
-  /***********************************************************                                  
+  /***********************************************************
      _ _ _     _____           _ 
     | | | |___| __  |___ ___  |_|
     | | | | . | __ -| . | . | | |
@@ -29,18 +29,16 @@ class WpBooj {
     add_action( 'wp_head',    array( $this, 'redirect_activeclients' ) );
 
 
-      //Hooks for Author Meta
-    add_action( 'personal_options_update', array( $this, 'my_save_extra_profile_fields' ) );
-    add_action( 'edit_user_profile_update', array( $this, 'my_save_extra_profile_fields' ) );
+    //Hooks for Author Meta
+    add_action( 'personal_options_update',  array( $this, 'booj_profile_fields_save' ) );
+    add_action( 'edit_user_profile_update', array( $this, 'booj_profile_fields_save' ) );
     
-    add_action( 'show_user_profile', array( $this, 'my_show_extra_profile_fields' ) );
-    add_action( 'edit_user_profile', array( $this, 'my_show_extra_profile_fields' ) );
+    add_action( 'show_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
+    add_action( 'edit_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
 
-    // Listen for the activate event
-    register_activation_hook( WP_BOOJ_FILE, array( $this, 'activate' ) );
-
-    // Deactivation plugin
-    register_deactivation_hook( WP_BOOJ_FILE, array( $this, 'deactivate' ) );
+    // Listen for the plugin activate/deactivate event
+    register_activation_hook(   WP_BOOJ_FILE,   array( $this, 'activate' ) );
+    register_deactivation_hook( WP_BOOJ_FILE,   array( $this, 'deactivate' ) );
   }
 
   public function activate() {
@@ -202,6 +200,8 @@ class WpBooj {
     }
   }
 
+
+
   /***********************************************************
      _____     _   _              _____     _       
     |  _  |_ _| |_| |_ ___ ___   |     |___| |_ ___ 
@@ -213,9 +213,7 @@ class WpBooj {
   */
 
 
-
-
-  function my_show_extra_profile_fields( $user ) { 
+  function booj_profile_fields_admin_display( $user ) { 
     ?>
     <h3>Enterprise Network Information</h3>
     <table class="form-table">
@@ -231,9 +229,38 @@ class WpBooj {
   }
 
 
-  function my_save_extra_profile_fields( $user_id ) {
+  function booj_profile_fields_save( $user_id ) {
     if ( !current_user_can( 'edit_user', $user_id ) )
       return false;
     update_usermeta( $user_id, 'agent_bio_url', $_POST['agent_bio_url'] );
-  }    
+  }
+
+
+
+  /***********************************************************                                                              
+     _____             _            _____         _           _   
+    |  _  |___ ___ _ _| |___ ___   |     |___ ___| |_ ___ ___| |_ 
+    |   __| . | . | | | | .'|  _|  |   --| . |   |  _| -_|   |  _|
+    |__|  |___|  _|___|_|__,|_|    |_____|___|_|_|_| |___|_|_|_|  
+              |_|                                                 
+
+    Select and generate the popular posts, authors, and top content authors.
+
+  */
+
+
+    public static function get_top_content_creators( $num_creators = 3 ){
+      global $wpdb;
+      $sql = "SELECT DISTINCT(post_author), COUNT(*) FROM wp_posts GROUP BY 1 ORDER BY 2 DESC LIMIT " . $num_creators;
+      $authors_db = $wpdb->get_results( $sql  );
+
+      $authors = array();
+      foreach( $authors_db  as $author ){
+        $authors[] = get_userdata( $author->post_author );
+      }
+
+      return $authors;
+    }
+
 }
+
