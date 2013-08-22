@@ -7,6 +7,8 @@
     |_____|  _|_____|___|___|_| |
           |_|               |___|
 
+    WpBooj
+
   */
 
 class WpBooj {
@@ -66,6 +68,8 @@ class WpBooj {
     | __ -| . | . | | |
     |_____|___|___|_| |
                   |___|
+
+    Booj
 
     Basic Setup for the entire plugin
 
@@ -127,6 +131,8 @@ class WpBooj {
     |_|___|__,|_  |  |_____|___|_| |___|___|_|_|
               |___|                             
 
+    Nag Screens
+
     This removes the "Update Wordpress" nag screen from the Admin 
 
   */
@@ -141,6 +147,8 @@ class WpBooj {
     |  |  |___| |___ 
     |  |  |  _| |_ -|
     |_____|_| |_|___|
+  
+    Urls
 
     This updates bad urls for the admin because of our Apache Proxy and stops users from access the active-clients.com location
 
@@ -208,6 +216,9 @@ class WpBooj {
     |     | | |  _|   | . |  _|  | | | | -_|  _| .'|
     |__|__|___|_| |_|_|___|_|    |_|_|_|___|_| |__,|
   
+
+    Author Meta 
+
     Add and display extra meta data for authors
 
   */
@@ -244,23 +255,53 @@ class WpBooj {
     |__|  |___|  _|___|_|__,|_|    |_____|___|_|_|_| |___|_|_|_|  
               |_|                                                 
 
+    Popular Content
+
     Select and generate the popular posts, authors, and top content authors.
+    Many of these methods require the Wp_PostViews plugin that Booj has modified.
 
   */
 
-
-    public static function get_top_content_creators( $num_creators = 3 ){
+    public static function get_top_content_creators( $num_creators = 3, $blacklist_ids = array() ){
       global $wpdb;
-      $sql = "SELECT DISTINCT(post_author), COUNT(*) FROM wp_posts GROUP BY 1 ORDER BY 2 DESC LIMIT " . $num_creators;
+      if( ! empty( $blacklist_ids ) ){
+        $where = ' WHERE ';
+        foreach ($blacklist_ids as $blacklist_id ) {
+          $where .= '`post_author` != ' . $blacklist_id . ' AND ';
+        }
+        $where = substr( $where, 0, -4 );
+      } else {
+        $where = "";
+      }
+
+      $sql = "SELECT DISTINCT(post_author), COUNT(*) FROM wp_posts ".$where." GROUP BY 1 ORDER BY 2 DESC LIMIT " . $num_creators;
+
       $authors_db = $wpdb->get_results( $sql  );
 
       $authors = array();
       foreach( $authors_db  as $author ){
         $authors[] = get_userdata( $author->post_author );
       }
-
       return $authors;
     }
+
+
+    /**
+      GET TOP POSTS
+      Description - Collects the posts with the most views for the current blog. 
+        This is done through wordpress meta_key meta_value store for posts
+        
+      Requires - Wp_PostViews
+
+      Usage -
+        foreach( WpBooj::get_top_posts( 5 ) as $post ){ echo $post['post_title']; }
+
+      Args -
+        $count ( defaults 5 )
+
+      Return - 
+        array
+    **/
 
     public static function get_top_posts( $count = 5 ){
       //@todo check to make sure WP-PostViews is installed!
@@ -283,5 +324,29 @@ class WpBooj {
       return $popular;
     }
 
+
+
+  /***********************************************************                     
+     _____ _         
+    |     |_|___ ___ 
+    | | | | |_ -|  _|
+    |_|_|_|_|___|___|
+
+    Misc
+
+    A collection of random functions that are put here for hopes of some sort of collection
+
+  */ 
+
+  public static function truncate( $string, $length ){
+    if( strlen( $string ) > $length ){
+      $new_string = substr( $string, 0, $length ) . '...';
+    } else {
+      $new_string = $string;
+    }
+    return $new_string;
+  }
+
 }
 
+/* ENDFILE: includes/WpBooj.php */
