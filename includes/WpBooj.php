@@ -305,23 +305,29 @@ class WpBooj {
 
     public static function get_top_posts( $count = 5 ){
       //@todo check to make sure WP-PostViews is installed!
-      global $wpdb;
-      $sql = "SELECT posts.ID, meta.meta_value, posts.post_title, posts.post_name, posts.post_date FROM`wp_postmeta` as meta
-             INNER JOIN `wp_posts` as posts
-             ON meta.post_id  = posts.ID
-             WHERE `meta_key` = 'views' ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
-      $posts = $wpdb->get_results( $sql  );
+      include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+      if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
+        global $wpdb;
+        $sql = "SELECT posts.ID, meta.meta_value, posts.post_title, posts.post_name, posts.post_date FROM`wp_postmeta` as meta
+               INNER JOIN `wp_posts` as posts
+               ON meta.post_id  = posts.ID
+               WHERE `meta_key` = 'views' ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
+        $posts = $wpdb->get_results( $sql  );
 
-      $popular = array();
-      foreach( $posts as $key => $post ){
-        $popular[$key]['post_id']    = $post->ID;
-        $popular[$key]['post_views'] = $post->meta_value;
-        $popular[$key]['post_title'] = $post->post_title;
-        $popular[$key]['post_slug']  = $post->post_name;
-        $popular[$key]['post_date']  = $post->post_date;
-        $popular[$key]['url']      = '/' . date( 'Y/m/', strtotime( $popular[$key]['post_date'] ) ) . $popular[$key]['post_slug'];
+        $popular = array();
+        foreach( $posts as $key => $post ){
+          $popular[$key]['post_id']    = $post->ID;
+          $popular[$key]['post_views'] = $post->meta_value;
+          $popular[$key]['post_title'] = $post->post_title;
+          $popular[$key]['post_slug']  = $post->post_name;
+          $popular[$key]['post_date']  = $post->post_date;
+          $popular[$key]['url']      = '/' . date( 'Y/m/', strtotime( $popular[$key]['post_date'] ) ) . $popular[$key]['post_slug'];
+        }
+        return $popular;
+
+      } else {
+        return 'Please install and enable the plugin "Wp Post Views"';
       }
-      return $popular;
     }
 
 
