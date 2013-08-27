@@ -18,6 +18,7 @@ class WpBooj {
   // Default values
   protected $data = array(
       'proxy_admin_urls' => '0',
+      'related_posts'    => '0',
   );
   
   function __construct(){
@@ -58,6 +59,7 @@ class WpBooj {
   public function validate($input) {
     $valid = array();
     $valid['proxy_admin_urls'] = $input['proxy_admin_urls'];
+    $valid['related_posts']    = $input['related_posts'];
     return $valid;
   }
 
@@ -114,6 +116,9 @@ class WpBooj {
             <tr valign="top"><th scope="row">Use Proxy Urls:</th>
               <td><input type="checkbox" name="<?php echo $this->option_name?>[proxy_admin_urls]" <? if( $options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
             </tr>
+            <tr valign="top"><th scope="row">Use Related Posts:</th>
+              <td><input type="checkbox" name="<?php echo $this->option_name?>[related_posts]" <? if( $options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
+            </tr>            
           </table>
           <p class="submit">
             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />

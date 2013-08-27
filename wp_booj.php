@@ -23,9 +23,8 @@ define( 'WP_BOOJ_FILE', __FILE__ );
 define( 'WP_BOOJ_PATH', plugin_dir_path( __FILE__ ) );
 require WP_BOOJ_PATH . 'includes/WpBooj.php';
 
-new WpBooj();
-
 $options = get_option( 'wp-booj' );
+
 if (! function_exists( 'wp_redirect' ) && $options['proxy_admin_urls'] == 'on' ) {
   function wp_redirect($location, $status = 302) {
     global $is_IIS;
@@ -63,6 +62,13 @@ function WpBoojFindURISegment(){
     }
   }
   return $uri;
+}
+
+new WpBooj();
+
+if( $options['related_posts'] == 'on' ){
+  require WP_BOOJ_PATH . 'includes/WpBoojRelated.php';
+  new WpBoojRelated();
 }
 
 
