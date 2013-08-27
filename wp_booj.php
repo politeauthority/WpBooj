@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: WP Booj
-Plugin URI: http://www.booj.com/
+Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
 Version: .081
 Author: Alix Fullerton
