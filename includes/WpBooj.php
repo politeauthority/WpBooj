@@ -76,7 +76,7 @@ class WpBooj {
   */
 
   public function booj_branding(){
-    if( get_bloginfo('version') == '3.5.1' ){
+    if( substr( get_bloginfo('version'), 0, 1 ) == '3' ){
       ?>
       <style type="text/css">
         #footer-upgrade{
