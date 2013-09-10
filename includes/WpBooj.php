@@ -330,6 +330,39 @@ class WpBooj {
       }
     }
 
+  /***********************************************************
+     _____         _     _ 
+    |   __|___ ___|_|___| |
+    |__   | . |  _| | .'| |
+    |_____|___|___|_|__,|_|
+
+    Social
+
+    A grab bag of social plugins.
+
+  */
+
+    /***
+      Get the most recent facebook status.
+      @params
+        id        : ex( 'ebbyhalliday')
+        appId     : ex( '121207014572698' )
+        appSecret : ex( '20b366570115d8748ff61274d7bf4338')
+    */
+  public static function get_latest_fb_status( $id, $appId, $appSecret ){
+    $facebook_url = "https://graph.facebook.com/$id/feed?fields=message,name,link&limit=1&access_token=$appId|$appSecret";
+    $curl = curl_init( $facebook_url );
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    $results = json_decode(curl_exec($curl), true);
+    curl_close($curl);
+    if ( isset($results['data']) ){
+      $results = isset($results['data'][0]) ? $results['data'][0] : false;
+    } else {
+      throw new Exception('Problem with Facebook');
+    }
+    $results['created_time'] = strtotime( $results['created_time'] )
+    return $results;
+  }
 
 
   /***********************************************************                     
