@@ -3,16 +3,17 @@
 Plugin Name: WP Booj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: .081
+Version: .082
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
-Release Date: 2013-08-26 11:30
+Release Date: 2013-09-10 12:45
 
 This version currently supports; 
 - Enterprise Branding Footer
 - Removes "update nag screen" from all views. 
 - Fixes ALL admin url breaks that can come about in Apache proxies
 - Adds author meta options in admin, see README.md for front-end ussage.
+- Facebook status integration.
 
 @Todo
   - Add option to redirect off of Active-Clients.com URL ALWAYS
