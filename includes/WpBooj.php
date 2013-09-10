@@ -367,7 +367,7 @@ class WpBooj {
     } else {
       throw new Exception('Problem with Facebook');
     }
-    $results['created_time'] = strtotime( $results['created_time'] )
+    $results['created_time'] = strtotime( $results['created_time'] );
     return $results;
   }
 
