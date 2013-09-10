@@ -21,8 +21,10 @@ class WpBooj {
   );
   
   function __construct(){
+
     add_action( 'admin_init', array( $this, 'admin_init')              );
     add_action( 'admin_init', array( $this, 'remove_nag' )             );
+    add_action( 'admin_head', array( $this, 'remove_nag_css' )         );
 
     add_action( 'admin_head', array( $this, 'booj_branding' )          );
     add_action( 'admin_head', array( $this, 'proxy_admin_urls' )       );
@@ -51,10 +53,6 @@ class WpBooj {
     delete_option( $this->option_name );
   }
 
-  public function admin_init(){
-    register_setting('todo_list_options', $this->option_name, array($this, 'validate'));
-  }
-
   public function validate($input) {
     $valid = array();
     $valid['proxy_admin_urls'] = $input['proxy_admin_urls'];
@@ -76,7 +74,7 @@ class WpBooj {
   */
 
   public function booj_branding(){
-    if( get_bloginfo('version') == '3.5.1' ){
+    if( substr( get_bloginfo('version'), 0, 1 ) == '3' ){
       ?>
       <style type="text/css">
         #footer-upgrade{
@@ -137,9 +135,18 @@ class WpBooj {
 
   */
 
-  public function remove_nag($matches) {
+  public function remove_nag() {
     remove_action('admin_notices', 'update_nag', 3);
   }
+
+  public function remove_nag_css(){
+    ?>
+    <style type="text/css">
+      #wp-admin-bar-updates{ display: none; }
+    </style>
+    <?
+  }
+
 
 
   /***********************************************************
