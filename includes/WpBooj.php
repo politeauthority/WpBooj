@@ -18,6 +18,7 @@ class WpBooj {
   // Default values
   protected $data = array(
       'proxy_admin_urls' => '0',
+      'related_posts'    => '0',
   );
   
   function __construct(){
@@ -56,6 +57,7 @@ class WpBooj {
   public function validate($input) {
     $valid = array();
     $valid['proxy_admin_urls'] = $input['proxy_admin_urls'];
+    $valid['related_posts']    = $input['related_posts'];
     return $valid;
   }
 
@@ -112,6 +114,9 @@ class WpBooj {
             <tr valign="top"><th scope="row">Use Proxy Urls:</th>
               <td><input type="checkbox" name="<?php echo $this->option_name?>[proxy_admin_urls]" <? if( $options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
             </tr>
+            <tr valign="top"><th scope="row">Use Related Posts:</th>
+              <td><input type="checkbox" name="<?php echo $this->option_name?>[related_posts]" <? if( $options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
+            </tr>            
           </table>
           <p class="submit">
             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
@@ -293,23 +298,22 @@ class WpBooj {
     }
 
 
-    /**
-      GET TOP POSTS
-      Description - Collects the posts with the most views for the current blog. 
-        This is done through wordpress meta_key meta_value store for posts
-        
-      Requires - Wp_PostViews
+  /***
+    GET TOP POSTS
+    Description - Collects the posts with the most views for the current blog. 
+      This is done through wordpress meta_key meta_value store for posts
+      
+    Requires - Wp_PostViews
 
-      Usage -
-        foreach( WpBooj::get_top_posts( 5 ) as $post ){ echo $post['post_title']; }
+    Usage -
+      foreach( WpBooj::get_top_posts( 5 ) as $post ){ echo $post['post_title']; }
 
-      Args -
-        $count ( defaults 5 )
+    Args -
+      $count ( defaults 5 )
 
-      Return - 
-        array
-    **/
-
+    Return - 
+      array
+   */
     public static function get_top_posts( $count = 5 ){
       //@todo check to make sure WP-PostViews is installed!
       include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
@@ -391,6 +395,19 @@ class WpBooj {
       $new_string = $string;
     }
     return $new_string;
+  }
+
+
+  /***
+    Remove HTML, PHP, and Wordpress captions, also, truncate if desired.
+    @params:
+      $string = string of content with potential html, php or Wordpress caption code
+      $length = int, length of the return string after code stripping
+   */
+  public static function removeCode( $string ){
+    $butterfly = strip_shortcodes( $string );
+    $butterfly = strip_tags( $butterfly );
+    return $butterfly;
   }
 
 }
