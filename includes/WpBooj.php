@@ -298,23 +298,22 @@ class WpBooj {
     }
 
 
-    /**
-      GET TOP POSTS
-      Description - Collects the posts with the most views for the current blog. 
-        This is done through wordpress meta_key meta_value store for posts
-        
-      Requires - Wp_PostViews
+  /***
+    GET TOP POSTS
+    Description - Collects the posts with the most views for the current blog. 
+      This is done through wordpress meta_key meta_value store for posts
+      
+    Requires - Wp_PostViews
 
-      Usage -
-        foreach( WpBooj::get_top_posts( 5 ) as $post ){ echo $post['post_title']; }
+    Usage -
+      foreach( WpBooj::get_top_posts( 5 ) as $post ){ echo $post['post_title']; }
 
-      Args -
-        $count ( defaults 5 )
+    Args -
+      $count ( defaults 5 )
 
-      Return - 
-        array
-    **/
-
+    Return - 
+      array
+   */
     public static function get_top_posts( $count = 5 ){
       //@todo check to make sure WP-PostViews is installed!
       include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
@@ -396,6 +395,19 @@ class WpBooj {
       $new_string = $string;
     }
     return $new_string;
+  }
+
+
+  /***
+    Remove HTML, PHP, and Wordpress captions, also, truncate if desired.
+    @params:
+      $string = string of content with potential html, php or Wordpress caption code
+      $length = int, length of the return string after code stripping
+   */
+  public static function removeCode( $string ){
+    $butterfly = strip_shortcodes( $string );
+    $butterfly = strip_tags( $butterfly );
+    return $butterfly;
   }
 
 }
