@@ -17,7 +17,7 @@ Popular Content
 Related Content
 - Note: Usage of Related Content Module must be enabled in the Wordpress Admin - WpBooj Settings
 - Below is an example usage of how to use the Related Content Module
-
+```
 <div id="related" class="clearfix">
      <h3>You may also like:</h3>
      <?php
@@ -42,3 +42,4 @@ Related Content
 	}
 	?>
 </div>
+```
