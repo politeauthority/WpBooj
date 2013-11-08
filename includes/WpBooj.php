@@ -13,7 +13,8 @@
 
 class WpBooj {
 
-  protected $option_name = 'wp-booj';
+  protected $option_group = 'wp-booj';  
+  protected $option_name  = 'wp-booj';
 
   // Default values
   protected $data = array(
@@ -25,6 +26,7 @@ class WpBooj {
 
     add_action( 'admin_init', array( $this, 'admin_init')              );
     add_action( 'admin_init', array( $this, 'remove_nag' )             );
+    add_action( 'admin_init', array( $this, 'register_the_settings' )  );
     add_action( 'admin_head', array( $this, 'remove_nag_css' )         );
 
     add_action( 'admin_head', array( $this, 'booj_branding' )          );
@@ -44,6 +46,10 @@ class WpBooj {
     // Listen for the plugin activate/deactivate event
     register_activation_hook(   WP_BOOJ_FILE,   array( $this, 'activate' ) );
     register_deactivation_hook( WP_BOOJ_FILE,   array( $this, 'deactivate' ) );
+  }
+
+  public function register_the_settings(){
+    register_setting( $this->option_group, $this->option_name, '0' );
   }
 
   public function activate() {
@@ -102,7 +108,14 @@ class WpBooj {
     if ( !current_user_can( 'manage_options' ) )  {
       wp_die( __( 'You do not have sufficient permissions to access this pag!e.' ) );
     }
-    $options = get_option($this->option_name);
+    $options = get_option($this->option_group);
+
+    //  alix data dump  {debug}  
+    // echo "<pre>"; print_r( $options ); die();
+
+    // echo "<pre>"; print_r( $this->option_name  );
+    // echo "<pre>"; print_r( $this->option_group  );    
+    // echo "<pre>asd"; print_r( $whitelist_options  ); die();
     ?>
     <div class="wrap">
       <?php screen_icon(); ?>
@@ -112,10 +125,10 @@ class WpBooj {
           <?php settings_fields('todo_list_options'); ?>
           <table class="form-table">
             <tr valign="top"><th scope="row">Use Proxy Urls:</th>
-              <td><input type="checkbox" name="<?php echo $this->option_name?>[proxy_admin_urls]" <? if( $options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
+              <td><input type="checkbox" name="<?php echo $this->option_name; ?>['proxy_admin_urls']" <? if( $options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
             </tr>
             <tr valign="top"><th scope="row">Use Related Posts:</th>
-              <td><input type="checkbox" name="<?php echo $this->option_name?>[related_posts]" <? if( $options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
+              <td><input type="checkbox" name="<?php echo $this->option_name; ?>['related_posts']" <? if( $options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
             </tr>            
           </table>
           <p class="submit">
@@ -319,7 +332,7 @@ class WpBooj {
       include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
       if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
         global $wpdb;
-        $sql = "SELECT posts.ID, meta.meta_value, posts.post_title, posts.post_name, posts.post_date FROM`wp_postmeta` as meta
+        $sql = "SELECT posts.ID, meta.meta_value, posts.post_title, posts.post_name, posts.post_date FROM `wp_postmeta` as meta
                INNER JOIN `wp_posts` as posts
                ON meta.post_id  = posts.ID
                WHERE `meta_key` = 'views' ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
@@ -340,6 +353,31 @@ class WpBooj {
         return 'Please install and enable the plugin "Wp Post Views"';
       }
     }
+
+    public static function get_top_posts_for_loop( $count = 10 ){
+
+      //@todo check to make sure WP-PostViews is installed!
+      include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+      if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
+        global $wpdb;
+        $sql = "SELECT posts.`ID`, meta.`meta_value`
+              FROM `wp_postmeta` as meta
+               INNER JOIN `wp_posts` as posts
+               ON meta.`post_id`  = posts.`ID`
+               WHERE meta.`meta_key` = 'views' AND posts.`post_type` = 'post' ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
+        $posts = $wpdb->get_results( $sql  );
+        $popular = array();
+        foreach( $posts as $key => $post ){
+          $popular[] = get_post( $post->ID );
+        }
+
+        return $popular;
+
+      } else {
+        return 'Please install and enable the plugin "Wp Post Views"';
+      }
+    }
+
 
   /***********************************************************
      _____         _     _ 

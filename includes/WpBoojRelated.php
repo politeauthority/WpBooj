@@ -79,7 +79,7 @@ class WpBoojRelated {
 			}
 		}
 
-		// HERE WE COMPUTE ARE POINTS
+		// HERE WE COMPUTE OUR POINTS
 		$weighted_posts = array();
 		foreach( $potential_posts as $key => $value ) {
 			if( is_object( $value['post'] ) ){
@@ -103,6 +103,7 @@ class WpBoojRelated {
 			}
 			$ids_to_omit = substr( $ids_to_omit, 0, -1);			
 
+			//@todo: should just select IDS to simplify
 			$query3 = "SELECT * FROM `wp_posts` 
 				WHERE `ID` NOT IN( ". $ids_to_omit ." )
 					AND `post_status` = 'publish'  
@@ -121,8 +122,9 @@ class WpBoojRelated {
 
 		$posts = array();
 
-		foreach ( $potential_posts as $the_post ) {
-			$posts[] = get_post( $the_post['post_id'] );
+		foreach ( $potential_posts as $the_post_added ) {
+
+			$posts[] = get_post( $the_post_added['ID'] );
 		}
 
 		if( count( $posts ) > $count ){

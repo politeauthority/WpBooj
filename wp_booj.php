@@ -69,7 +69,8 @@ new WpBooj();
 
 if( $options['related_posts'] == 'on' ){
   require WP_BOOJ_PATH . 'includes/WpBoojRelated.php';
-  new WpBoojRelated();
+  $WpBoojRelated = new WpBoojRelated();
+  //echo "<pre>"; print_r( $WpBoojRelated ); die();
 }
 
 
