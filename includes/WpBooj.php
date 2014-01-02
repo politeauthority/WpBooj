@@ -434,7 +434,24 @@ class WpBooj {
     }
     return $new_string;
   }
+  
+  public static function truncate_by_word( $string, $length ){
+    $words        = explode( ' ', $string );
+    $truncated    = ''; 
+    $letter_count = 0;
 
+    foreach ($words as $key => $word) {
+      if( $letter_count < $length ){
+        $truncated    = $truncated . $word . ' ';
+        $letter_count = $letter_count + strlen ( $word );        
+      } else {
+        $truncated = substr( $truncated, 0, -1 );        
+        break;
+      }
+    }
+    $truncated = $truncated . '...';
+    return $truncated;
+  }
 
   /***
     Remove HTML, PHP, and Wordpress captions, also, truncate if desired.
