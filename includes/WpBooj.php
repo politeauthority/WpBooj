@@ -437,19 +437,21 @@ class WpBooj {
   
   public static function truncate_by_word( $string, $length ){
     $words        = explode( ' ', $string );
-    $truncated    = ''; 
+    $truncated    = '';
     $letter_count = 0;
 
     foreach ($words as $key => $word) {
       if( $letter_count < $length ){
         $truncated    = $truncated . $word . ' ';
-        $letter_count = $letter_count + strlen ( $word );        
+        $letter_count = $letter_count + strlen ( $word );
       } else {
-        $truncated = substr( $truncated, 0, -1 );        
+        $truncated = substr( $truncated, 0, -1 );
         break;
       }
     }
-    $truncated = $truncated . '...';
+    if( strlen( $string ) > strlen( $truncated ) ){
+      $truncated = $truncated . '...';
+    }
     return $truncated;
   }
 
