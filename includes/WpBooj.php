@@ -364,7 +364,11 @@ class WpBooj {
               FROM `wp_postmeta` as meta
                INNER JOIN `wp_posts` as posts
                ON meta.`post_id`  = posts.`ID`
-               WHERE meta.`meta_key` = 'views' AND posts.`post_type` = 'post' ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
+               WHERE 
+                 meta.`meta_key` = 'views' 
+                 AND posts.`post_type` = 'post'
+                 AND posts.`post_status` = 'publish'
+              ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
         $posts = $wpdb->get_results( $sql  );
         $popular = array();
         foreach( $posts as $key => $post ){
