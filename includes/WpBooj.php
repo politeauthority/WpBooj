@@ -299,7 +299,7 @@ class WpBooj {
         $where = "";
       }
 
-      $sql = "SELECT DISTINCT(post_author), COUNT(*) FROM wp_posts ".$where." GROUP BY 1 ORDER BY 2 DESC LIMIT " . $num_creators;
+      $sql = "SELECT DISTINCT(post_author), COUNT(*) FROM {$wpdb->prefix}posts ".$where." GROUP BY 1 ORDER BY 2 DESC LIMIT " . $num_creators;
 
       $authors_db = $wpdb->get_results( $sql  );
 
@@ -332,8 +332,8 @@ class WpBooj {
       include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
       if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
         global $wpdb;
-        $sql = "SELECT posts.ID, meta.meta_value, posts.post_title, posts.post_name, posts.post_date FROM `wp_postmeta` as meta
-               INNER JOIN `wp_posts` as posts
+        $sql = "SELECT posts.ID, meta.meta_value, posts.post_title, posts.post_name, posts.post_date FROM `{$wpdb->prefix}postmeta` as meta
+               INNER JOIN `{$wpdb->prefix}posts` as posts
                ON meta.post_id  = posts.ID
                WHERE `meta_key` = 'views' ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
         $posts = $wpdb->get_results( $sql  );
@@ -355,14 +355,12 @@ class WpBooj {
     }
 
     public static function get_top_posts_for_loop( $count = 10 ){
-
-      //@todo check to make sure WP-PostViews is installed!
       include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
       if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
         global $wpdb;
         $sql = "SELECT posts.`ID`, meta.`meta_value`
-              FROM `wp_postmeta` as meta
-               INNER JOIN `wp_posts` as posts
+              FROM `{$wpdb->prefix}postmeta` as meta
+               INNER JOIN `{$wpdb->prefix}posts` as posts
                ON meta.`post_id`  = posts.`ID`
                WHERE 
                  meta.`meta_key` = 'views' 
@@ -374,11 +372,9 @@ class WpBooj {
         foreach( $posts as $key => $post ){
           $popular[] = get_post( $post->ID );
         }
-
         return $popular;
-
       } else {
-        return 'Please install and enable the plugin "Wp Post Views"';
+        exit( 'Please install and enable the plugin "Wp Post Views"' );
       }
     }
 
@@ -398,9 +394,9 @@ class WpBooj {
     /***
       Get the most recent facebook status.
       @params
-        id        : ex( 'ebbyhalliday')
+        id        : ex( 'aclient')
         appId     : ex( '121207014572698' )
-        appSecret : ex( '20b366570115d8748ff61274d7bf4338')
+        appSecret : ex( '20b366570115d4444ff61274d7bf4338')
     */
   public static function get_latest_fb_status( $id, $appId, $appSecret ){
     $facebook_url = "https://graph.facebook.com/$id/feed?fields=message,name,link&limit=1&access_token=$appId|$appSecret";

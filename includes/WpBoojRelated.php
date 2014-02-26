@@ -12,18 +12,14 @@ class WpBoojRelated {
 	
 	public static function get( $post_id, $count = 4 ){
 		global $wpdb;
-		//	alix data dump	{debug}	
-		// echo "<pre>"; print_r( $post_id ); die();
 
-
-		// GET THE CATEGORIES AND TAG IDS THAT WE WANT TO FIND
+		// Get the cat and tag ids from the given $post_id
 		$tags  = wp_get_post_tags( $post_id );
 		$tag_ids = '';
 		foreach ( $tags as $key => $tag) {
 			$tag_ids .= $tag->term_id . ',';
 		}
 		$tag_ids = substr( $tag_ids, 0, -1);	
-
 
 		$cats  = get_the_category( $post_id );
 		$cat_ids = '';
@@ -37,7 +33,7 @@ class WpBoojRelated {
 		// WHICH USE ANY OF THE SAME CATS / TAGS ORDERD AMMOUNT OF SIMILARITIES
 		// $potential_posts is created here
 		$query = "SELECT DISTINCT( object_id ), COUNT(*) AS count 
-			FROM `wp_term_relationships` 
+			FROM `{$wpdb->prefix}term_relationships` 
 			WHERE `term_taxonomy_id` IN( " . $tag_ids . "," . $cat_ids ." ) 
 				AND `object_id` != " . $post_id . "
 			GROUP BY 1
@@ -63,13 +59,12 @@ class WpBoojRelated {
 		// WE ARE FILTERING OUT ANY POST WHICH IS NOT PUBLISHED
 		// $potential_posts is important here
 
-		$query2 = "SELECT `ID`, `post_date` FROM `wp_posts` 
+		$query2 = "SELECT `ID`, `post_date` FROM `{$wpdb->prefix}posts` 
 			WHERE `ID` IN( ". $post_ids ." ) 
 				AND `post_status` = 'publish'
 				AND `post_type`   = 'post'
 			ORDER BY `post_date` DESC";
 		$rows = $wpdb->get_results( $query2 );
-
 
 		foreach( $rows as $key => $row ) {
 			if( is_array( $potential_posts[ $row->ID ]) ){
@@ -104,13 +99,12 @@ class WpBoojRelated {
 			$ids_to_omit = substr( $ids_to_omit, 0, -1);			
 
 			//@todo: should just select IDS to simplify
-			$query3 = "SELECT * FROM `wp_posts` 
+			$query3 = "SELECT * FROM `{$wpdb->prefix}posts` 
 				WHERE `ID` NOT IN( ". $ids_to_omit ." )
 					AND `post_status` = 'publish'  
 					AND `post_type` = 'post' 
 				ORDER BY `post_date` DESC
 				LIMIT " . $posts_more_needed;
-
 
 			$rows = $wpdb->get_results( $query3 );
 
@@ -122,16 +116,16 @@ class WpBoojRelated {
 
 		$posts = array();
 
-		foreach ( $potential_posts as $the_post_added ) {
+		foreach ( $potential_posts as $the_post_added ) { $posts[] = get_post( $the_post_added['ID'] ); }
 
-			$posts[] = get_post( $the_post_added['ID'] );
-		}
-
-		if( count( $posts ) > $count ){
-			$posts = array_slice( $posts, 0, $count, True );
-		}
+		if( count( $posts ) > $count ){ $posts = array_slice( $posts, 0, $count, True ); }
 
 		return $posts;
 	}
+
+	//@todo: Write a caching capability for this component
+	private function check_cache(){ }
+
+	private function write_cache(){ }
 
 }
