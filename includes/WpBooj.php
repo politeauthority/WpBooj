@@ -23,7 +23,6 @@ class WpBooj {
   );
   
   function __construct(){
-
     add_action( 'admin_init', array( $this, 'admin_init')              );
     add_action( 'admin_init', array( $this, 'remove_nag' )             );
     add_action( 'admin_init', array( $this, 'register_the_settings' )  );
@@ -34,7 +33,6 @@ class WpBooj {
     add_action( 'admin_menu', array( $this, 'setting_menu' )           );
 
     add_action( 'wp_head',    array( $this, 'redirect_activeclients' ) );
-
 
     //Hooks for Author Meta
     add_action( 'personal_options_update',  array( $this, 'booj_profile_fields_save' ) );
@@ -66,6 +64,7 @@ class WpBooj {
     $valid['related_posts']    = $input['related_posts'];
     return $valid;
   }
+
 
 
   /***********************************************************                        
@@ -103,19 +102,18 @@ class WpBooj {
     add_options_page( 'Booj Options', 'WpBooj', 'manage_options', 'wpbooj_options', array( $this, 'booj_options_page' ) );
   }
 
-    //Booj Options Page
+  //Booj Options Page
   public function booj_options_page() {
     if ( !current_user_can( 'manage_options' ) )  {
       wp_die( __( 'You do not have sufficient permissions to access this pag!e.' ) );
     }
     $options = get_option($this->option_group);
 
-    //  alix data dump  {debug}  
+    //  {debugs}  
     // echo "<pre>"; print_r( $options ); die();
-
     // echo "<pre>"; print_r( $this->option_name  );
     // echo "<pre>"; print_r( $this->option_group  );    
-    // echo "<pre>asd"; print_r( $whitelist_options  ); die();
+    // echo "<pre>"; print_r( $whitelist_options  ); die();
     ?>
     <div class="wrap">
       <?php screen_icon(); ?>
@@ -140,6 +138,7 @@ class WpBooj {
   }
 
 
+
   /***********************************************************                      
      _____            _____                     
     |   | |___ ___   |   __|___ ___ ___ ___ ___ 
@@ -160,7 +159,10 @@ class WpBooj {
   public function remove_nag_css(){
     ?>
     <style type="text/css">
+      /* heres the css */
       #wp-admin-bar-updates{ display: none; }
+      #menu-dashboard ul li a .update-count{ display: none; }
+      .plugin-count{ display: none !important; }
     </style>
     <?
   }
@@ -198,7 +200,7 @@ class WpBooj {
         $_SERVER['HTTP_HOST'] = get_site_url() ;        
       }
 
-        // This updates the remote_addr because of the proxy this would normally get lost
+      // This updates the remote_addr because of the proxy this would normally get lost
       if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
         $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
         $_SERVER['REMOTE_ADDR'] = trim($ips[0]);
@@ -209,7 +211,7 @@ class WpBooj {
       }
 
       // Update the links we may have missed with this
-        // we catch all urls that start with "/" and put /blog/ ahead
+      // we catch all urls that start with "/" and put /blog/ ahead
       ?>
       <script type="text/javascript">
         uri_segment = '<? echo WpBoojFindURISegment(); ?>';
@@ -287,28 +289,28 @@ class WpBooj {
 
   */
 
-    public static function get_top_content_creators( $num_creators = 3, $blacklist_ids = array() ){
-      global $wpdb;
-      if( ! empty( $blacklist_ids ) ){
-        $where = ' WHERE ';
-        foreach ($blacklist_ids as $blacklist_id ) {
-          $where .= '`post_author` != ' . $blacklist_id . ' AND ';
-        }
-        $where = substr( $where, 0, -4 );
-      } else {
-        $where = "";
+  public static function get_top_content_creators( $num_creators = 3, $blacklist_ids = array() ){
+    global $wpdb;
+    if( ! empty( $blacklist_ids ) ){
+      $where = ' WHERE ';
+      foreach ($blacklist_ids as $blacklist_id ) {
+        $where .= '`post_author` != ' . $blacklist_id . ' AND ';
       }
-
-      $sql = "SELECT DISTINCT(post_author), COUNT(*) FROM {$wpdb->prefix}posts ".$where." GROUP BY 1 ORDER BY 2 DESC LIMIT " . $num_creators;
-
-      $authors_db = $wpdb->get_results( $sql  );
-
-      $authors = array();
-      foreach( $authors_db  as $author ){
-        $authors[] = get_userdata( $author->post_author );
-      }
-      return $authors;
+      $where = substr( $where, 0, -4 );
+    } else {
+      $where = "";
     }
+
+    $sql = "SELECT DISTINCT(post_author), COUNT(*) FROM {$wpdb->prefix}posts ".$where." GROUP BY 1 ORDER BY 2 DESC LIMIT " . $num_creators;
+
+    $authors_db = $wpdb->get_results( $sql  );
+
+    $authors = array();
+    foreach( $authors_db  as $author ){
+      $authors[] = get_userdata( $author->post_author );
+    }
+    return $authors;
+  }
 
 
   /***
@@ -327,56 +329,56 @@ class WpBooj {
     Return - 
       array
    */
-    public static function get_top_posts( $count = 5 ){
-      //@todo check to make sure WP-PostViews is installed!
-      include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-      if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
-        global $wpdb;
-        $sql = "SELECT posts.ID, meta.meta_value, posts.post_title, posts.post_name, posts.post_date FROM `{$wpdb->prefix}postmeta` as meta
-               INNER JOIN `{$wpdb->prefix}posts` as posts
-               ON meta.post_id  = posts.ID
-               WHERE `meta_key` = 'views' ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
-        $posts = $wpdb->get_results( $sql  );
+  public static function get_top_posts( $count = 5 ){
+    //@todo check to make sure WP-PostViews is installed!
+    include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+    if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
+      global $wpdb;
+      $sql = "SELECT posts.ID, meta.meta_value, posts.post_title, posts.post_name, posts.post_date FROM `{$wpdb->prefix}postmeta` as meta
+             INNER JOIN `{$wpdb->prefix}posts` as posts
+             ON meta.post_id  = posts.ID
+             WHERE `meta_key` = 'views' ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
+      $posts = $wpdb->get_results( $sql  );
 
-        $popular = array();
-        foreach( $posts as $key => $post ){
-          $popular[$key]['post_id']    = $post->ID;
-          $popular[$key]['post_views'] = $post->meta_value;
-          $popular[$key]['post_title'] = $post->post_title;
-          $popular[$key]['post_slug']  = $post->post_name;
-          $popular[$key]['post_date']  = $post->post_date;
-          $popular[$key]['url']      = '/' . date( 'Y/m/', strtotime( $popular[$key]['post_date'] ) ) . $popular[$key]['post_slug'];
-        }
-        return $popular;
-
-      } else {
-        return 'Please install and enable the plugin "Wp Post Views"';
+      $popular = array();
+      foreach( $posts as $key => $post ){
+        $popular[$key]['post_id']    = $post->ID;
+        $popular[$key]['post_views'] = $post->meta_value;
+        $popular[$key]['post_title'] = $post->post_title;
+        $popular[$key]['post_slug']  = $post->post_name;
+        $popular[$key]['post_date']  = $post->post_date;
+        $popular[$key]['url']      = '/' . date( 'Y/m/', strtotime( $popular[$key]['post_date'] ) ) . $popular[$key]['post_slug'];
       }
-    }
+      return $popular;
 
-    public static function get_top_posts_for_loop( $count = 10 ){
-      include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-      if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
-        global $wpdb;
-        $sql = "SELECT posts.`ID`, meta.`meta_value`
-              FROM `{$wpdb->prefix}postmeta` as meta
-               INNER JOIN `{$wpdb->prefix}posts` as posts
-               ON meta.`post_id`  = posts.`ID`
-               WHERE 
-                 meta.`meta_key` = 'views' 
-                 AND posts.`post_type` = 'post'
-                 AND posts.`post_status` = 'publish'
-              ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
-        $posts = $wpdb->get_results( $sql  );
-        $popular = array();
-        foreach( $posts as $key => $post ){
-          $popular[] = get_post( $post->ID );
-        }
-        return $popular;
-      } else {
-        exit( 'Please install and enable the plugin "Wp Post Views"' );
-      }
+    } else {
+      return 'Please install and enable the plugin "Wp Post Views"';
     }
+  }
+
+  public static function get_top_posts_for_loop( $count = 10 ){
+    include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+    if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
+      global $wpdb;
+      $sql = "SELECT posts.`ID`, meta.`meta_value`
+            FROM `{$wpdb->prefix}postmeta` as meta
+             INNER JOIN `{$wpdb->prefix}posts` as posts
+             ON meta.`post_id`  = posts.`ID`
+             WHERE 
+               meta.`meta_key` = 'views' 
+               AND posts.`post_type` = 'post'
+               AND posts.`post_status` = 'publish'
+            ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
+      $posts = $wpdb->get_results( $sql  );
+      $popular = array();
+      foreach( $posts as $key => $post ){
+        $popular[] = get_post( $post->ID );
+      }
+      return $popular;
+    } else {
+      exit( 'Please install and enable the plugin "Wp Post Views"' );
+    }
+  }
 
 
   /***********************************************************

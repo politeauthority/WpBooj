@@ -8,6 +8,22 @@
 	      |_|               |___|                                      
 	*/
 
+/*
+	Basic Usage on Frontend:
+
+	$post_id = get_the_ID();
+	foreach( $WpBoojRelated::get( $post_id ) as $related ){
+	  echo $related->ID;
+	  echo $related->post_title;
+	  if ( has_post_thumbnail( $related->ID ) ){
+	    echo get_the_post_thumbnail( $related->ID );
+	  } else {
+	    echo 'no image avail';
+	  }
+}	
+*/
+
+
 class WpBoojRelated {
 	
 	public static function get( $post_id, $count = 4 ){
@@ -39,11 +55,9 @@ class WpBoojRelated {
 			GROUP BY 1
 			ORDER BY 2 DESC
 			LIMIT 50";
-
 		$rows = $wpdb->get_results( $query );
 
 		$potential_posts = array();
-
 		$post_ids = '';
 		foreach( $rows as $key => $row ) {
 			$potential_posts[$row->object_id] = array( 
@@ -58,14 +72,13 @@ class WpBoojRelated {
 		// NOW WE QUERY AGAINST THE POST IDS FROM ABOVE
 		// WE ARE FILTERING OUT ANY POST WHICH IS NOT PUBLISHED
 		// $potential_posts is important here
-
 		$query2 = "SELECT `ID`, `post_date` FROM `{$wpdb->prefix}posts` 
 			WHERE `ID` IN( ". $post_ids ." ) 
 				AND `post_status` = 'publish'
 				AND `post_type`   = 'post'
 			ORDER BY `post_date` DESC";
-		$rows = $wpdb->get_results( $query2 );
 
+		$rows = $wpdb->get_results( $query2 );
 		foreach( $rows as $key => $row ) {
 			if( is_array( $potential_posts[ $row->ID ]) ){
 				$date_point_penelty = round( ( time() - strtotime( $row->post_date ) ) / 86400, 0 );
@@ -106,6 +119,8 @@ class WpBoojRelated {
 				ORDER BY `post_date` DESC
 				LIMIT " . $posts_more_needed;
 
+
+
 			$rows = $wpdb->get_results( $query3 );
 
 			foreach( $rows as $key => $row ) {
@@ -116,16 +131,13 @@ class WpBoojRelated {
 
 		$posts = array();
 
-		foreach ( $potential_posts as $the_post_added ) { $posts[] = get_post( $the_post_added['ID'] ); }
+		foreach ( $potential_posts as $the_post_added ) { 
+			$posts[] = get_post( $the_post_added['post_id'] ); 
+		}
 
 		if( count( $posts ) > $count ){ $posts = array_slice( $posts, 0, $count, True ); }
 
 		return $posts;
 	}
-
-	//@todo: Write a caching capability for this component
-	private function check_cache(){ }
-
-	private function write_cache(){ }
 
 }
