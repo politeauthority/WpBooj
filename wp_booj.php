@@ -68,6 +68,11 @@ function WpBoojFindURISegment(){
 
 new WpBooj();
 
+if( is_admin() ){
+  require WP_BOOJ_PATH . 'includes/WpBoojAdmin.php';
+  $my_settings_page = new WpBoojAdmin();
+}
+
 if( $options['related_posts'] == 'on' ){
   require WP_BOOJ_PATH . 'includes/WpBoojRelated.php';
   $WpBoojRelated = new WpBoojRelated();

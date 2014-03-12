@@ -48,6 +48,26 @@ class WpBooj {
 
   public function register_the_settings(){
     register_setting( $this->option_group, $this->option_name, '0' );
+      add_settings_section(
+        'setting_section_id', // ID
+        'My Custom Settings', // Title
+        array( $this, 'print_section_info' ), // Callback
+        'booj-setting-admin' // Page
+      );
+      add_settings_field(
+        'proxy_admin_urls', // ID
+        'Proxy Admin Urls', // Title 
+        array( $this, 'booj_options_proxy_admin_urls' ), // Callback
+        'booj-setting-admin', // Page
+        'setting_section_id' // Section           
+      );
+      add_settings_field(
+        'related_posts', 
+        'Use Related Posts', 
+        array( $this, 'booj_options_related_posts' ), 
+        'booj-setting-admin', 
+        'setting_section_id'
+      );              
   }
 
   public function activate() {
@@ -80,6 +100,7 @@ class WpBooj {
 
   */
 
+
   public function booj_branding(){
     if( substr( get_bloginfo('version'), 0, 1 ) == '3' ){
       ?>
@@ -99,7 +120,41 @@ class WpBooj {
 
   public function setting_menu() {
     // add_options_page( 'My Plugin Options', 'My Plugin', 'manage_options', 'my-unique-identifier', 'my_plugin_options' );
-    add_options_page( 'Booj Options', 'WpBooj', 'manage_options', 'wpbooj_options', array( $this, 'booj_options_page' ) );
+    add_options_page( 'Booj Options', 'WpBooj', 'manage_options', 'wpbooj_options', array( $this, 'booj_options_page2' ) );
+  }
+
+
+  public function booj_options_proxy_admin_urls( ) {
+    ?>
+      <input type="checkbox" name="<?php echo $this->option_name; ?>['proxy_admin_urls']" <? if( $options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> />
+    <?
+  }
+
+  public function booj_options_related_posts( ) {
+    ?>
+      <input type="checkbox" name="<?php echo $this->option_name; ?>['related_posts']" <? if( $options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> />
+    <?
+  }
+
+  public function booj_options_page2(){
+    // Set class property
+    $this->options = get_option( 'wp-booj' );
+    // echo "<pre>aa"; print_r( $this->options ); die();
+    ?>
+    <div class="wrap">
+        <?php screen_icon(); ?>
+        <h2>WpBooj Options</h2>
+        <p>If you don't understand these options, you will want to leave them as they are!</p>        
+        <form method="post" action="options.php">
+        <?php
+            // This prints out all hidden setting fields
+            settings_fields( 'wp-booj' );   
+            do_settings_sections( 'booj-setting-admin' );
+            submit_button(); 
+        ?>
+        </form>
+    </div>
+    <?php
   }
 
   //Booj Options Page
@@ -110,7 +165,7 @@ class WpBooj {
     $options = get_option($this->option_group);
 
     //  {debugs}  
-    // echo "<pre>"; print_r( $options ); die();
+
     // echo "<pre>"; print_r( $this->option_name  );
     // echo "<pre>"; print_r( $this->option_group  );    
     // echo "<pre>"; print_r( $whitelist_options  ); die();
@@ -119,20 +174,20 @@ class WpBooj {
       <?php screen_icon(); ?>
       <h2>WpBooj</h2>
       <p>If you don't understand these options, you will want to leave them as they are!</p>
-        <form method="post" action="options.php">
-          <?php settings_fields('todo_list_options'); ?>
-          <table class="form-table">
-            <tr valign="top"><th scope="row">Use Proxy Urls:</th>
-              <td><input type="checkbox" name="<?php echo $this->option_name; ?>['proxy_admin_urls']" <? if( $options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
-            </tr>
-            <tr valign="top"><th scope="row">Use Related Posts:</th>
-              <td><input type="checkbox" name="<?php echo $this->option_name; ?>['related_posts']" <? if( $options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
-            </tr>            
-          </table>
-          <p class="submit">
-            <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
-          </p>
-        </form>
+      <form method="post" action=""> 
+        <?php settings_fields('todo_list_options'); ?>
+        <table class="form-table">
+          <tr valign="top"><th scope="row">Use Proxy Urls:</th>
+            <td><input type="checkbox" name="<?php echo $this->option_name; ?>['proxy_admin_urls']" <? if( $options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
+          </tr>
+          <tr valign="top"><th scope="row">Use Related Posts:</th>
+            <td><input type="checkbox" name="<?php echo $this->option_name; ?>['related_posts']" <? if( $options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> /></td>
+          </tr>            
+        </table>
+        <p class="submit">
+          <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
+        </p>
+      </form>
     </div>
     <?
   }
@@ -250,7 +305,6 @@ class WpBooj {
 
   */
 
-
   function booj_profile_fields_admin_display( $user ) { 
     ?>
     <h3>Enterprise Network Information</h3>
@@ -265,7 +319,6 @@ class WpBooj {
     </table>
     <? 
   }
-
 
   function booj_profile_fields_save( $user_id ) {
     if ( !current_user_can( 'edit_user', $user_id ) )
@@ -312,7 +365,6 @@ class WpBooj {
     return $authors;
   }
 
-
   /***
     GET TOP POSTS
     Description - Collects the posts with the most views for the current blog. 
@@ -329,6 +381,7 @@ class WpBooj {
     Return - 
       array
    */
+
   public static function get_top_posts( $count = 5 ){
     //@todo check to make sure WP-PostViews is installed!
     include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
