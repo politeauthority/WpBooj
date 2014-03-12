@@ -34,8 +34,8 @@ class WpBoojAdmin
     {
         // This page will be under "Settings"
         add_options_page(
-            'Settings Admin', 
-            'My Settings', 
+            'WpBooj', 
+            'WpBooj', 
             'manage_options', 
             'my-setting-admin', 
             array( $this, 'create_admin_page' )
@@ -48,7 +48,7 @@ class WpBoojAdmin
     public function create_admin_page()
     {
         // Set class property
-        $this->options = get_option( 'my_option_name' );
+        $this->options = get_option( 'wp-booj' );
         ?>
         <div class="wrap">
             <?php screen_icon(); ?>
@@ -72,29 +72,29 @@ class WpBoojAdmin
     {        
         register_setting(
             'my_option_group', // Option group
-            'my_option_name', // Option name
+            'wp-booj', // Option name
             array( $this, 'sanitize' ) // Sanitize
         );
 
         add_settings_section(
             'setting_section_id', // ID
-            'My Custom Settings', // Title
+            'My Custom Settings', // related_posts
             array( $this, 'print_section_info' ), // Callback
             'my-setting-admin' // Page
         );  
 
         add_settings_field(
-            'id_number', // ID
-            'ID Number', // Title 
-            array( $this, 'id_number_callback' ), // Callback
+            'proxy_admin_urls', // ID
+            'Proxy Admin Urls', // related_posts 
+            array( $this, 'proxy_admin_urls_callback' ), // Callback
             'my-setting-admin', // Page
             'setting_section_id' // Section           
         );      
 
         add_settings_field(
-            'title', 
-            'Title', 
-            array( $this, 'title_callback' ), 
+            'related_posts', 
+            'Use Related Posts', 
+            array( $this, 'related_posts_callback' ), 
             'my-setting-admin', 
             'setting_section_id'
         );      
@@ -108,11 +108,11 @@ class WpBoojAdmin
     public function sanitize( $input )
     {
         $new_input = array();
-        if( isset( $input['id_number'] ) )
-            $new_input['id_number'] = absint( $input['id_number'] );
+        if( isset( $input['proxy_admin_urls'] ) )
+            $new_input['proxy_admin_urls'] = $input['proxy_admin_urls'] ;
 
-        if( isset( $input['title'] ) )
-            $new_input['title'] = sanitize_text_field( $input['title'] );
+        if( isset( $input['related_posts'] ) )
+            $new_input['related_posts'] = sanitize_text_field( $input['related_posts'] );
 
         return $new_input;
     }
@@ -128,25 +128,19 @@ class WpBoojAdmin
     /** 
      * Get the settings option array and print one of its values
      */
-    public function id_number_callback()
-    {
-        printf(
-            '<input type="text" id="id_number" name="my_option_name[id_number]" value="%s" />',
-            isset( $this->options['id_number'] ) ? esc_attr( $this->options['id_number']) : ''
-        );
+    public function proxy_admin_urls_callback(){
+        ?>
+        <input type="checkbox" name="wp-booj[proxy_admin_urls]" <? if( $this->options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+        <?
     }
 
     /** 
      * Get the settings option array and print one of its values
      */
-    public function title_callback()
+    public function related_posts_callback()
     {
-        printf(
-            '<input type="text" id="title" name="my_option_name[title]" value="%s" />',
-            isset( $this->options['title'] ) ? esc_attr( $this->options['title']) : ''
-        );
+        ?>
+        <input type="checkbox" name="wp-booj[related_posts]" <? if( $this->options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+        <?
     }
 }
-
-if( is_admin() )
-    $my_settings_page = new MySettingsPage();

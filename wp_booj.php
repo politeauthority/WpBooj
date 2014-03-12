@@ -21,9 +21,20 @@ This version currently supports;
   - Add option to force "featured images" on a post
 */
 
-define( 'WP_BOOJ_FILE', __FILE__ );
 define( 'WP_BOOJ_PATH', plugin_dir_path( __FILE__ ) );
 require WP_BOOJ_PATH . 'includes/WpBooj.php';
+
+// new WpBooj();
+
+if( is_admin() ){
+  require WP_BOOJ_PATH . 'includes/WpBoojAdmin.php';
+  new WpBoojAdmin();
+}
+
+// if( $options['related_posts'] == 'on' ){
+//   require WP_BOOJ_PATH . 'includes/WpBoojRelated.php';
+//   // $WpBoojRelated = new WpBoojRelated();
+// }
 
 $options = get_option( 'wp-booj' );
 
@@ -66,15 +77,4 @@ function WpBoojFindURISegment(){
   return $uri;
 }
 
-new WpBooj();
-
-if( is_admin() ){
-  require WP_BOOJ_PATH . 'includes/WpBoojAdmin.php';
-  $my_settings_page = new WpBoojAdmin();
-}
-
-if( $options['related_posts'] == 'on' ){
-  require WP_BOOJ_PATH . 'includes/WpBoojRelated.php';
-  $WpBoojRelated = new WpBoojRelated();
-}
 ?>

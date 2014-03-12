@@ -13,37 +13,37 @@
 
 class WpBooj {
 
-  protected $option_group = 'wp-booj';  
-  protected $option_name  = 'wp-booj';
+  // protected $option_group = 'wp-booj';  
+  // protected $option_name  = 'wp-booj';
 
-  // Default values
-  protected $data = array(
-      'proxy_admin_urls' => '0',
-      'related_posts'    => '0',
-  );
+  // // Default values
+  // protected $data = array(
+  //     'proxy_admin_urls' => '0',
+  //     'related_posts'    => '0',
+  // );
   
   function __construct(){
-    add_action( 'admin_init', array( $this, 'admin_init')              );
-    add_action( 'admin_init', array( $this, 'remove_nag' )             );
-    add_action( 'admin_init', array( $this, 'register_the_settings' )  );
-    add_action( 'admin_head', array( $this, 'remove_nag_css' )         );
+    // add_action( 'admin_init', array( $this, 'admin_init')              );
+    // add_action( 'admin_init', array( $this, 'remove_nag' )             );
+    // add_action( 'admin_init', array( $this, 'register_the_settings' )  );
+    // add_action( 'admin_head', array( $this, 'remove_nag_css' )         );
 
-    add_action( 'admin_head', array( $this, 'booj_branding' )          );
-    add_action( 'admin_head', array( $this, 'proxy_admin_urls' )       );
-    add_action( 'admin_menu', array( $this, 'setting_menu' )           );
+    // add_action( 'admin_head', array( $this, 'booj_branding' )          );
+    // add_action( 'admin_head', array( $this, 'proxy_admin_urls' )       );
+    // add_action( 'admin_menu', array( $this, 'setting_menu' )           );
 
-    add_action( 'wp_head',    array( $this, 'redirect_activeclients' ) );
+    // add_action( 'wp_head',    array( $this, 'redirect_activeclients' ) );
 
-    //Hooks for Author Meta
-    add_action( 'personal_options_update',  array( $this, 'booj_profile_fields_save' ) );
-    add_action( 'edit_user_profile_update', array( $this, 'booj_profile_fields_save' ) );
+    // //Hooks for Author Meta
+    // add_action( 'personal_options_update',  array( $this, 'booj_profile_fields_save' ) );
+    // add_action( 'edit_user_profile_update', array( $this, 'booj_profile_fields_save' ) );
     
-    add_action( 'show_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
-    add_action( 'edit_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
+    // add_action( 'show_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
+    // add_action( 'edit_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
 
     // Listen for the plugin activate/deactivate event
-    register_activation_hook(   WP_BOOJ_FILE,   array( $this, 'activate' ) );
-    register_deactivation_hook( WP_BOOJ_FILE,   array( $this, 'deactivate' ) );
+    // register_activation_hook(   WP_BOOJ_FILE,   array( $this, 'activate' ) );
+    // register_deactivation_hook( WP_BOOJ_FILE,   array( $this, 'deactivate' ) );
   }
 
   public function register_the_settings(){
