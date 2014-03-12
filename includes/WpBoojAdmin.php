@@ -84,7 +84,7 @@ class WpBoojAdmin
     ?>
     <div class="wrap">
       <?php screen_icon(); ?>
-      <h2>My Settings</h2>           
+      <h2>WpBooj Settings</h2>           
       <form method="post" action="options.php">
         <?php
           // This prints out all hidden setting fields
@@ -109,7 +109,7 @@ class WpBoojAdmin
 
     add_settings_section(
       'setting_section_id', // ID
-      'My Custom Settings', // related_posts
+      'General Settings', // related_posts
       array( $this, 'print_section_info' ), // Callback
       'wp-booj-admin' // Page
     );  
@@ -151,7 +151,7 @@ class WpBoojAdmin
    * Print the Section text
    */
   public function print_section_info(){
-    print 'Enter your settings below:';
+    print "If you don't understand these options, you will want to leave them as they are!";
   }
 
   /** 
