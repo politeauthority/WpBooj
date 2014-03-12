@@ -44,7 +44,7 @@ class WpBooj {
   */
 
   public function redirect_activeclients(){
-    $options = get_option( $this->option_name );
+    $options = get_option( 'wp-booj' );
     if( $options['proxy_admin_urls'] == 'on' && ! isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ){
       header( 'Location: ' . get_site_url() . '/' );   
     }

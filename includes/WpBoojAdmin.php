@@ -226,14 +226,13 @@ class WpBoojAdmin
     // Update the HTTP_HOST because wordpress bases urls off of this
     // We're removing 7 characters, 'http://' so the site_url MUST BE ex: http://www.clarkhawaii.com/
     // @todo: Make this more robust for the above reason!
-    $options = get_option( $this->option_name );
+    $options = get_option( 'wp-booj' );
     if( $options['proxy_admin_urls'] == 'on' ){
       if( substr( get_site_url(), 0, 7 ) == 'http://'){
         $_SERVER['HTTP_HOST'] = substr( get_site_url(), 7 );
       } else {
         $_SERVER['HTTP_HOST'] = get_site_url() ;        
       }
-
       // This updates the remote_addr because of the proxy this would normally get lost
       if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
         $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
