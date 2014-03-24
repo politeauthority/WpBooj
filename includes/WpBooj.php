@@ -14,8 +14,13 @@
 class WpBooj {
   
   function __construct(){
+    // Action for activeclient redirect
     add_action( 'wp_head',    array( $this, 'redirect_activeclients' ) );
 
+    // Actions for random post 
+    add_action( 'init', array( $this, 'random_post' ) );
+    add_action( 'template_redirect', array( $this, 'random_template' ) );  
+    
     // Listen for the plugin activate/deactivate event
     register_activation_hook(   WP_BOOJ_FILE,   array( $this, 'activate' ) );
     register_deactivation_hook( WP_BOOJ_FILE,   array( $this, 'deactivate' ) );
@@ -107,7 +112,6 @@ class WpBooj {
    */
 
   public static function get_top_posts( $count = 5 ){
-    //@todo check to make sure WP-PostViews is installed!
     include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
     if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
       global $wpdb;
@@ -244,6 +248,27 @@ class WpBooj {
     $butterfly = strip_shortcodes( $string );
     $butterfly = strip_tags( $butterfly );
     return $butterfly;
+  }
+
+  /***
+    Get Random Post
+  */
+
+  public static function random_post(){
+    global $wp;
+    $wp->add_query_var('random');
+    add_rewrite_rule('random/?$', 'index.php?random=1', 'top');
+  }
+
+  public static function random_template() {
+    if (get_query_var('random') == 1) {
+      $posts = get_posts('post_type=post&orderby=rand&numberposts=1');
+      foreach($posts as $post) {
+        $link = get_permalink($post);
+      }
+      wp_redirect( $link, 307 );
+      exit;
+    }
   }
 
 }
