@@ -128,7 +128,16 @@ class WpBoojAdmin
       array( $this, 'related_posts_callback' ), 
       'wp-booj-admin', 
       'setting_section_id'
-    );      
+    );
+
+    add_settings_field(
+      'relative_urls', 
+      'Use Relative Urls', 
+      array( $this, 'relative_urls_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    ); 
+
   }
 
   /**
@@ -143,6 +152,9 @@ class WpBoojAdmin
 
     if( isset( $input['related_posts'] ) )
       $new_input['related_posts'] = $input['related_posts'];
+
+    if( isset( $input['relative_urls'] ) )
+      $new_input['relative_urls'] = $input['relative_urls'];
 
     return $new_input;
   }
@@ -163,12 +175,15 @@ class WpBoojAdmin
     <?
   }
 
-  /** 
-   * Get the settings option array and print one of its values
-   */
   public function related_posts_callback(){
     ?>
     <input type="checkbox" name="wp-booj[related_posts]" <? if( $this->options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?
+  }
+
+  public function relative_urls_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[relative_urls]" <? if( $this->options['relative_urls'] == 'on' ){ echo 'checked="checked"'; } ?> />        
     <?
   }
 

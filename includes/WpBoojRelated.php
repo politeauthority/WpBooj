@@ -48,9 +48,20 @@ class WpBoojRelated {
 		// NOW WELL LOOK FOR ALL THE OTHER POSTS / PAGES
 		// WHICH USE ANY OF THE SAME CATS / TAGS ORDERD AMMOUNT OF SIMILARITIES
 		// $potential_posts is created here
+
+		if( $tag_ids == '' && $cat_ids == ''){
+			$full_search = '';
+		} elseif( $tag_ids == '' && $cat_ids != '' ){
+			$full_search = $cat_ids;
+		} elseif( $tag_ids != '' && $cat_ids == '' ){
+			$full_search = $tag_ids;
+		}		 else {
+			$full_search = $tag_ids . "," . $cat_ids;
+		}
+
 		$query = "SELECT DISTINCT( object_id ), COUNT(*) AS count 
 			FROM `{$wpdb->prefix}term_relationships` 
-			WHERE `term_taxonomy_id` IN( " . $tag_ids . "," . $cat_ids ." ) 
+			WHERE `term_taxonomy_id` IN( " . $full_search ." ) 
 				AND `object_id` != " . $post_id . "
 			GROUP BY 1
 			ORDER BY 2 DESC

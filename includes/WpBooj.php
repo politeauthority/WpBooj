@@ -14,8 +14,9 @@
 class WpBooj {
   
   function __construct(){
-    // Action for activeclient redirect
+    // Actions for front end url fixes
     add_action( 'wp_head',    array( $this, 'redirect_activeclients' ) );
+    add_action( 'wp_head',    array( $this, 'relative_urls' ) );
 
     // Actions for random post 
     add_action( 'init', array( $this, 'random_post' ) );
@@ -44,10 +45,32 @@ class WpBooj {
   
     Urls
 
-    stops users from access the active-clients.com location
-
   */
 
+  public function relative_urls(){
+    $options = get_option( 'wp-booj' );
+    if( $options['relative_urls'] == 'on' ){
+      $headers         = apache_request_headers();
+      $blog_url        = get_bloginfo( 'wpurl' );
+      $blog_url_strip  = str_replace( array( 'http://', 'www'), '', $blog_url );
+      if( $blog_url_strip != $headers['Host'] ){
+        $blog_url = 'www.' . $blog_url;
+        if ( $options['proxy_admin_urls'] == 'on' && isset( $headers['X-Forwarded-Host'] ) ){
+          $blog_url .= '/blog/';
+        }
+      } else {
+        $blog_url = get_bloginfo( 'wpurl' );
+      }
+      return $blog_url;
+      //   this section is sourced from mcgurie were we pulled this off nicely.
+      // $rebranded = (isset($headers['X-Forwarded-Host']) && $headers['X-Forwarded-Host'] != $blog_url ) ? $headers['X-Forwarded-Host'] : false  ;
+      // if( $rebranded != 'www.mcgurie.com' ){ $site_home = 'http://' . $rebranded; }
+    }
+  }
+
+  /***
+    Stops users and bots from accessing the active-clients.com location  
+  */
   public function redirect_activeclients(){
     $options = get_option( 'wp-booj' );
     if( $options['proxy_admin_urls'] == 'on' && ! isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ){
