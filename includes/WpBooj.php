@@ -266,7 +266,7 @@ class WpBooj {
     @params:
       $string = string of content with potential html, php or Wordpress caption code
       $length = int, length of the return string after code stripping
-   */
+  */
   public static function removeCode( $string ){
     $butterfly = strip_shortcodes( $string );
     $butterfly = strip_tags( $butterfly );
@@ -291,6 +291,27 @@ class WpBooj {
       }
       wp_redirect( $link, 307 );
       exit;
+    }
+  }
+  
+  /***
+   Get Post Thumbnail
+   @params:
+     $post_id       = int
+     $size          = array( int, int )
+     $default_image = str url of fallback image
+  */
+  public static function get_post_thumbnail( $post_id, $size = array( 300, 300 ), $default_image = False ){
+    $thumbnail_id = get_post_thumbnail_id( $post_id );
+    if( $thumbnail_id ){
+      $src = wp_get_attachment_image_src( $thumbnail_id, $size ); 
+      echo $src[0];
+      return $src[0];
+    }
+    if( $default_image ){
+      return $default_image;
+    } else {
+      return False;
     }
   }
 

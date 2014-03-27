@@ -3,22 +3,23 @@
 Plugin Name: WP Booj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: 1.01
+Version: 1.03
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
-Release Date: 2014-03-24 15:27
+Release Date: 2014-03-26 23:38
 
 This version currently supports; 
 - Enterprise Branding Footer
-- Removes "update nag screen" from all views. 
-- Fixes ALL admin url breaks that can come about in Apache proxies
 - Adds author meta options in admin, see README.md for front-end ussage.
 - Facebook status integration.
-- Random Post button
-- Supports variable table prefixes
+- Random post button
+- Related Posts
 
-@Todo
-  - Add option to force "featured images" on a post
+Developer Features
+- Supports variable table prefixes
+- Removes "update nag screen" from all views. 
+- Fixes ALL admin url breaks that can come about in Apache proxies
+
 */
 
 define( 'WP_BOOJ_PATH', plugin_dir_path( __FILE__ ) );
