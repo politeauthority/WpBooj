@@ -28,7 +28,6 @@ class WpBoojRelated {
 	
 	public static function get( $post_id, $count = 4 ){
 		global $wpdb;
-
 		// Get the cat and tag ids from the given $post_id
 		$tags  = wp_get_post_tags( $post_id );
 		$tag_ids = '';
@@ -129,9 +128,7 @@ class WpBoojRelated {
 					AND `post_type` = 'post' 
 				ORDER BY `post_date` DESC
 				LIMIT " . $posts_more_needed;
-
-
-
+				
 			$rows = $wpdb->get_results( $query3 );
 
 			foreach( $rows as $key => $row ) {

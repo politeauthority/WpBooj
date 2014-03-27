@@ -297,15 +297,14 @@ class WpBooj {
   /***
    Get Post Thumbnail
    @params:
-     $post_id       = int
+     $post_id       = (int)
      $size          = array( int, int )
-     $default_image = str url of fallback image
+     $default_image = (str) url of fallback image
   */
   public static function get_post_thumbnail( $post_id, $size = array( 300, 300 ), $default_image = False ){
     $thumbnail_id = get_post_thumbnail_id( $post_id );
     if( $thumbnail_id ){
-      $src = wp_get_attachment_image_src( $thumbnail_id, $size ); 
-      echo $src[0];
+      $src = wp_get_attachment_image_src( $thumbnail_id, $size );
       return $src[0];
     }
     if( $default_image ){
