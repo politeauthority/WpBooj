@@ -17,6 +17,7 @@ class WpBooj {
     // Actions for front end url fixes
     add_action( 'wp_head',    array( $this, 'redirect_activeclients' ) );
     add_action( 'wp_head',    array( $this, 'relative_urls' ) );
+    add_action( 'init',       array( $this, 'x_forwarded' ) );
 
     // Actions for random post 
     add_action( 'init', array( $this, 'random_post' ) );
@@ -78,6 +79,24 @@ class WpBooj {
     }
   }
 
+  /***                                                                                                                                                             
+    This takes the HTTP_X_FORWARDED_FOR var and replaces the REMOTE_ADDR                                                                                           
+    We do this to help our security plugins find the remote user through the proxy,                                                                                
+    and not the app server that directed them there.                                                                                                               
+  */
+  public function x_forwarded(){
+    global $_SERVER;
+    $options = get_option( 'wp-booj' );
+    if( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) && $options['proxy_admin_urls'] == 'on' ){
+      if( strpos( $_SERVER['HTTP_X_FORWARDED_FOR'], ',' ) !== False ){
+        $new_remote_addr = explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] );
+        $new_remote_addr = $new_remote_addr[0];
+      } else {
+        $new_remote_addr = $_SERVER['HTTP_X_FORWARDED_FOR'];
+      }
+      $_SERVER['REMOTE_ADDR'] = $new_remote_addr;
+    }
+  }
 
 
   /***********************************************************                                                              

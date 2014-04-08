@@ -3,10 +3,10 @@
 Plugin Name: WP Booj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: 1.03
+Version: 1.04
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
-Release Date: 2014-03-26 23:38
+Release Date: 2014-04-07
 
 This version currently supports; 
 - Enterprise Branding Footer
@@ -26,7 +26,6 @@ define( 'WP_BOOJ_PATH', plugin_dir_path( __FILE__ ) );
 require WP_BOOJ_PATH . 'includes/WpBooj.php';
 
 $options = get_option( 'wp-booj' );
-// echo 'hi'; print_r( $options ); die()
 
 new WpBooj();
 
@@ -39,8 +38,6 @@ if( $options['related_posts'] == 'on' ){
   require WP_BOOJ_PATH . 'includes/WpBoojRelated.php';
   $WpBoojRelated = new WpBoojRelated();
 }
-
-
 
 if (! function_exists( 'wp_redirect' ) && $options['proxy_admin_urls'] == 'on' ) {
   function wp_redirect($location, $status = 302) {
