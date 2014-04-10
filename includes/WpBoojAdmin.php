@@ -21,11 +21,12 @@ class WpBoojAdmin
 
   public function __construct(){
     add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
-    add_action( 'admin_init', array( $this, 'page_init' ) );
 
+    add_action( 'admin_init', array( $this, 'page_init' ) );
 
     add_action( 'admin_head', array( $this, 'booj_branding' )          );
     add_action( 'admin_head', array( $this, 'proxy_admin_urls' )       );
+    add_action( 'admin_head', array( $this, 'plugin_management' ) );
 
     add_action( 'show_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
     add_action( 'edit_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
@@ -138,6 +139,14 @@ class WpBoojAdmin
       'setting_section_id'
     ); 
 
+    add_settings_field(
+      'disable_plugin_management', 
+      'Disable Plugin Management', 
+      array( $this, 'disable_plugin_management_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    ); 
+
   }
 
   /**
@@ -155,6 +164,9 @@ class WpBoojAdmin
 
     if( isset( $input['relative_urls'] ) )
       $new_input['relative_urls'] = $input['relative_urls'];
+
+    if( isset( $input['disable_plugin_management'] ) )
+      $new_input['disable_plugin_management'] = $input['disable_plugin_management'];
 
     return $new_input;
   }
@@ -187,7 +199,11 @@ class WpBoojAdmin
     <?
   }
 
-
+  public function disable_plugin_management_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[disable_plugin_management]" <? if( $this->options['disable_plugin_management'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?
+  }
 
   /***********************************************************
      _____     _   _              _____     _       
@@ -313,6 +329,20 @@ class WpBoojAdmin
     <?
   }
 
-
+  public function plugin_management(){
+    $options = get_option( 'wp-booj' );
+    if( $options['disable_plugin_management'] == 'on' ){
+      $user = wp_get_current_user();
+      if( $user->data->user_login != 'booj' ){
+        ?>
+        <style type="text/css">
+          #menu-plugins {
+            display: none;
+          }
+        </style>
+        <?
+      }
+    }
+  }
 
 }

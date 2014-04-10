@@ -117,7 +117,7 @@ class WpBooj {
     global $wpdb;
     if( ! empty( $blacklist_ids ) ){
       $where = ' WHERE ';
-      foreach ($blacklist_ids as $blacklist_id ) {
+      foreach( $blacklist_ids as $blacklist_id ) {
         $where .= '`post_author` != ' . $blacklist_id . ' AND ';
       }
       $where = substr( $where, 0, -4 );
