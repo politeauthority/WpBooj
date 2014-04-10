@@ -336,9 +336,8 @@ class WpBoojAdmin
       if( $user->data->user_login != 'booj' ){
         ?>
         <style type="text/css">
-          #menu-plugins {
-            display: none;
-          }
+          #menu-plugins { display: none; }
+          #toplevel_page_itsec { display: none; }
         </style>
         <?
       }
