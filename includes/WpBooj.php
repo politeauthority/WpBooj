@@ -23,6 +23,10 @@ class WpBooj {
     add_action( 'init', array( $this, 'random_post' ) );
     add_action( 'template_redirect', array( $this, 'random_template' ) );  
     
+    // Actions for feed modifications
+    add_action( 'rss2_item', array( $this, 'feed_featured_image_enclosure' ) );
+    add_action( 'rss2_item', array( $this, 'feed_realtor_image_enclosure' ) );
+    
     // Listen for the plugin activate/deactivate event
     register_activation_hook(   WP_BOOJ_FILE,   array( $this, 'activate' ) );
     register_deactivation_hook( WP_BOOJ_FILE,   array( $this, 'deactivate' ) );
@@ -239,6 +243,55 @@ class WpBooj {
   }
 
 
+  /************************************************************
+     _____           _ 
+    |   __|___ ___ _| |
+    |   __| -_| -_| . |
+    |__|  |___|___|___|
+  
+    Feed
+    
+    Grabs images for feed enclosures when needed.
+
+    */
+  function feed_featured_image_enclosure() {
+    if ( ! has_post_thumbnail() )
+      return;
+    $thumbnail_size = apply_filters( 'rss_enclosure_image_size', 'thumbnail' );
+    $thumbnail_id = get_post_thumbnail_id( get_the_ID() );
+    $thumbnail = image_get_intermediate_size( $thumbnail_id, $thumbnail_size );
+    if ( empty( $thumbnail ) )
+      return;
+    $upload_dir = wp_upload_dir();
+    printf( 
+	   '<enclosure name="featured_image" url="%s" length="%s" type="%s" />',
+	   $thumbnail['url'], 
+	   filesize( path_join( $upload_dir['basedir'], $thumbnail['path'] ) ), 
+	   get_post_mime_type( $thumbnail_id ) 
+    );
+  }
+
+  function feed_realtor_image_enclosure() {
+    include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+    if( is_plugin_active( 'user-photo/user-photo.php' ) ){
+      global $post;
+      $user_photo = $this->user_photo( $post->post_author );
+      if( $user_photo ){
+	$upload_dir = wp_upload_dir();
+	$image_type = explode( '.', $user_photo['userphoto_image_file'] );
+	printf(
+	       '<enclosure name="realtor_image" url="%s" length="%s" type="%s" />',
+	       $user_photo['url'],
+	       filesize( path_join( $upload_dir['basedir'], 'userphoto', $user_photo['userphoto_image_file'] ) ),
+	       'image/' . $image_type[ count( $image_type ) - 1 ]
+	);
+      }
+    }
+  }
+
+
+
+
   /***********************************************************                     
      _____ _         
     |     |_|___ ___ 
@@ -250,6 +303,29 @@ class WpBooj {
     A collection of random functions that are put here for hopes of some sort of collection
 
   */ 
+
+  public static function user_photo( $user_id, $default = False ){
+    global $wpdb;
+    $sql = "SELECT * FROM {$wpdb->prefix}usermeta 
+      WHERE user_id = '". $user_id ."' AND 
+        meta_key IN ( 'userphoto_approvalstatus', 'userphoto_image_file', 'userphoto_image_width', 'userphoto_image_height' )
+      ORDER BY meta_key ASC;";
+    $user_photo = $wpdb->get_results( $sql  );
+    if( ! empty( $user_photo ) ){
+      $photo_info = array();
+      foreach( $user_photo as $info ){
+	$photo_info[ $info->meta_key ] = $info->meta_value;
+      }
+      $photo_info['url'] = get_bloginfo( 'wpurl' ) . '/wp-content/uploads/userphoto/' . $photo_info['userphoto_image_file'];
+      return $photo_info;
+    } else {
+      if( $default ){
+	return $default;
+      } else {
+	return False;
+      }
+    }
+  }
 
   public static function truncate( $string, $length ){
     if( strlen( $string ) > $length ){
@@ -294,6 +370,7 @@ class WpBooj {
 
   /***
     Get Random Post
+    Desc: Will fetch a random post if the url /?random=1 is requested
   */
 
   public static function random_post(){
