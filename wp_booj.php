@@ -3,10 +3,10 @@
 Plugin Name: WP Booj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: 1.08
+Version: 1.081
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
-Release Date: 2014-04-16
+Release Date: 2014-04-21
 
 This version currently supports; 
 - Enterprise Branding Footer

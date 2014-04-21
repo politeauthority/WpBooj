@@ -1,15 +1,14 @@
 <?php
+/***********************************************************
+   _ _ _     _____           _ 
+  | | | |___| __  |___ ___  |_|
+  | | | | . | __ -| . | . | | |
+  |_____|  _|_____|___|___|_| |
+        |_|               |___|
 
-  /***********************************************************
-     _ _ _     _____           _ 
-    | | | |___| __  |___ ___  |_|
-    | | | | . | __ -| . | . | | |
-    |_____|  _|_____|___|___|_| |
-          |_|               |___|
+  WpBooj
 
-    WpBooj
-
-  */
+*/
 
 class WpBooj {
   
@@ -67,7 +66,7 @@ class WpBooj {
         $blog_url = get_bloginfo( 'wpurl' );
       }
       return $blog_url;
-      //   this section is sourced from mcgurie were we pulled this off nicely.
+      //   this section is sourced from mcgurie where we pulled this off nicely.
       // $rebranded = (isset($headers['X-Forwarded-Host']) && $headers['X-Forwarded-Host'] != $blog_url ) ? $headers['X-Forwarded-Host'] : false  ;
       // if( $rebranded != 'www.mcgurie.com' ){ $site_home = 'http://' . $rebranded; }
     }
@@ -156,7 +155,6 @@ class WpBooj {
     Return - 
       array
    */
-
   public static function get_top_posts( $count = 5 ){
     include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
     if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
@@ -219,14 +217,13 @@ class WpBooj {
     A grab bag of social plugins.
 
   */
-
-    /***
-      Get the most recent facebook status.
-      @params
-        id        : ex( 'aclient')
-        appId     : ex( '121207014572698' )
-        appSecret : ex( '20b366570115d4444ff61274d7bf4338')
-    */
+  /***
+    Get the most recent facebook status.
+    @params
+      id        : ex( 'aclient')
+      appId     : ex( '121207014572698' )
+      appSecret : ex( '20b366570115d4444ff61274d7bf4338')
+  */
   public static function get_latest_fb_status( $id, $appId, $appSecret ){
     $facebook_url = "https://graph.facebook.com/$id/feed?fields=message,name,link&limit=1&access_token=$appId|$appSecret";
     $curl = curl_init( $facebook_url );
@@ -253,7 +250,7 @@ class WpBooj {
     
     Grabs images for feed enclosures when needed.
 
-    */
+  */
   function feed_featured_image_enclosure() {
     if ( ! has_post_thumbnail() )
       return;
@@ -277,18 +274,17 @@ class WpBooj {
       global $post;
       $user_photo = $this->user_photo( $post->post_author );
       if( $user_photo ){
-	$upload_dir = wp_upload_dir();
-	$image_type = explode( '.', $user_photo['userphoto_image_file'] );
-	printf(
-	       '<enclosure name="realtor_image" url="%s" length="%s" type="%s" />',
-	       $user_photo['url'],
-	       filesize( path_join( $upload_dir['basedir'], 'userphoto', $user_photo['userphoto_image_file'] ) ),
-	       'image/' . $image_type[ count( $image_type ) - 1 ]
-	);
+        $upload_dir = wp_upload_dir();
+        $image_type = explode( '.', $user_photo['userphoto_image_file'] );
+        printf(
+          '<enclosure name="realtor_image" url="%s" length="%s" type="%s" />',
+          $user_photo['url'],
+          filesize( path_join( $upload_dir['basedir'], 'userphoto', $user_photo['userphoto_image_file'] ) ),
+          'image/' . $image_type[ count( $image_type ) - 1 ]
+        );
       }
     }
   }
-
 
 
 
@@ -300,10 +296,20 @@ class WpBooj {
 
     Misc
 
-    A collection of random functions that are put here for hopes of some sort of collection
+    A collection of random functions that are put here.
 
   */ 
-
+  /***
+    User Photo
+    Get the user photo raw url without any html markup
+    @params
+      $user_id = int( )
+      $default = str( ) ex: http://devblog.active-clients.com/wp-content/uploads/userphoto/8.jpg
+        optional, value to be returned if nothing could be found.
+    @return
+      str( ) = url
+      ex: http://devblog.active-clients.com/wp-content/uploads/userphoto/8.jpg
+  */
   public static function user_photo( $user_id, $default = False ){
     global $wpdb;
     $sql = "SELECT * FROM {$wpdb->prefix}usermeta 
@@ -314,15 +320,15 @@ class WpBooj {
     if( ! empty( $user_photo ) ){
       $photo_info = array();
       foreach( $user_photo as $info ){
-	$photo_info[ $info->meta_key ] = $info->meta_value;
+        $photo_info[ $info->meta_key ] = $info->meta_value;
       }
       $photo_info['url'] = get_bloginfo( 'wpurl' ) . '/wp-content/uploads/userphoto/' . $photo_info['userphoto_image_file'];
       return $photo_info;
     } else {
       if( $default ){
-	return $default;
+        return $default;
       } else {
-	return False;
+        return False;
       }
     }
   }
@@ -340,7 +346,6 @@ class WpBooj {
     $words        = explode( ' ', $string );
     $truncated    = '';
     $letter_count = 0;
-
     foreach ($words as $key => $word) {
       if( $letter_count < $length ){
         $truncated    = $truncated . $word . ' ';
@@ -372,7 +377,6 @@ class WpBooj {
     Get Random Post
     Desc: Will fetch a random post if the url /?random=1 is requested
   */
-
   public static function random_post(){
     global $wp;
     $wp->add_query_var('random');
@@ -408,6 +412,23 @@ class WpBooj {
     } else {
       return False;
     }
+  }
+
+  /***
+    Get Authors
+    @params
+      $order_by    = (string)(optional) field to order return by
+  */
+  public static function get_authors( $order_by = Null ){
+    global $wpdb;
+    $sql = "SELECT user_login, display_name FROM {$wpdb->prefix}users";
+    if( $order_by ){
+      $sql .= " ORDER BY {$order_by} ASC;";
+    } else {
+      $sql = ";";
+    }
+    $users = $wpdb->get_results( $sql  );
+    return $users;
   }
 
 }
