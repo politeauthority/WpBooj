@@ -3,7 +3,7 @@
 Plugin Name: WP Booj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: 1.081
+Version: 1.10
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
 Release Date: 2014-04-21
@@ -24,6 +24,7 @@ Developer Features
 
 define( 'WP_BOOJ_PATH', plugin_dir_path( __FILE__ ) );
 require WP_BOOJ_PATH . 'includes/WpBooj.php';
+require WP_BOOJ_PATH . 'includes/WpBoojCache.php';
 
 $options = get_option( 'wp-booj' );
 
