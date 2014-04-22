@@ -32,11 +32,11 @@ class WpBooj {
   }
 
   public function activate() {
-    global $wpdp;
+    global $wpdb;
     update_option( $this->option_name, $this->data );
 
     // Create the WpBoojCache table, currently only used by WpBoojRelated
-    $WpBoojRelated_cache_table_sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}WpBoojCache
+    $WpBoojRelated_cache_table_sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}WpBoojCache (
       `cache_id` int(11) NOT NULL AUTO_INCREMENT,
       `post_id` int(11) DEFAULT NULL,
       `type` varchar(255) DEFAULT NULL,

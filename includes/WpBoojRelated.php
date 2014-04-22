@@ -177,6 +177,7 @@ class WpBoojRelated {
 			`type`,`post_id` VALUES( "WpBoojRelated", {$post_id} );"""
 	}
 
+	//@todo: this needs to get called whenever a post is updated, probably a button in the admin too
 	public static function clear_cache( $post_id = None ){
 		//@todo: serialize $posts
 		global $wpdb;
