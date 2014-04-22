@@ -8,7 +8,6 @@
 	  
   WpBooj :: Related
 
-
 	Basic Usage on Frontend:
 
 	$post_id = get_the_ID();
@@ -20,12 +19,18 @@
 	  } else {
 	    echo 'no image avail';
 	  }
-	}	
+	}
 */
 
 class WpBoojRelated {
 	
 	public static function get( $post_id, $count = 4 ){
+		// Check for a cache
+		$related_cache = self.__check_cache( $post_id );
+		if( $related_cache ){
+			return $related_cache;
+		}
+
 		global $wpdb;
 		// Get the cat and tag ids from the given $post_id
 		$tags  = wp_get_post_tags( $post_id );
@@ -144,7 +149,39 @@ class WpBoojRelated {
 
 		if( count( $posts ) > $count ){ $posts = array_slice( $posts, 0, $count, True ); }
 
+		// store a cached version if we found content
+		if( count( $posts ) == $count ){
+			$this->__store_cache( $post_id, $posts );
+		}
+
 		return $posts;
 	}
+
+	private function __check_cache( $post_id ){
+		global $wpdb;
+		//@todo: get the correct timeago;
+		$seconds_cache_can_live = 1000;
+		$time_ago = 1000;
+		$sql = """SELECT * FROM {$wpdb->prefix}WpBoojCache WHERE 
+			`type` = 'WpBoojRelated' AND
+			`post_id` = {$post_id} AND
+			`last_update_ts` > "{$time_ago}";""";
+		//@todo: if we get a result, unserialize and send it back
+		return False;
+	}
+
+	private function __store_cache( $post_id, $posts ){
+		//@todo: serialize $posts
+		global $wpdb;
+		$sql = """INSERT INTO {$wpdb->prefix}WpBoojCache 
+			`type`,`post_id` VALUES( "WpBoojRelated", {$post_id} );"""
+	}
+
+	public static function clear_cache( $post_id = None ){
+		//@todo: serialize $posts
+		global $wpdb;
+		$sql = """INSERT INTO {$wpdb->prefix}WpBoojCache 
+			`type`,`post_id` VALUES( "WpBoojRelated", {$post_id} );"""
+	}	
 
 }

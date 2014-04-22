@@ -32,7 +32,18 @@ class WpBooj {
   }
 
   public function activate() {
+    global $wpdp;
     update_option( $this->option_name, $this->data );
+
+    // Create the WpBoojCache table, currently only used by WpBoojRelated
+    $WpBoojRelated_cache_table_sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}WpBoojCache
+      `cache_id` int(11) NOT NULL AUTO_INCREMENT,
+      `post_id` int(11) DEFAULT NULL,
+      `type` varchar(255) DEFAULT NULL,
+      `related_posts` longtext(40) DEFAULT NULL,
+      `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (`cache_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
   }
 
   public function deactivate() {
@@ -363,7 +374,7 @@ class WpBooj {
 
   /***
     Remove HTML, PHP, and Wordpress captions, also, truncate if desired.
-    @params:
+    @params
       $string = string of content with potential html, php or Wordpress caption code
       $length = int, length of the return string after code stripping
   */
@@ -396,7 +407,7 @@ class WpBooj {
   
   /***
    Get Post Thumbnail
-   @params:
+   @params
      $post_id       = (int)
      $size          = array( int, int )
      $default_image = (str) url of fallback image
