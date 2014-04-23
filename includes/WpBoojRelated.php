@@ -1,159 +1,363 @@
 <?php
 /***********************************************************                                                          
-	 _ _ _     _____           _    _ _    _____     _     _         _ 
-	| | | |___| __  |___ ___  |_|  |_|_|  | __  |___| |___| |_ ___ _| |
-	| | | | . | __ -| . | . | | |   _ _   |    -| -_| | .'|  _| -_| . |
-	|_____|  _|_____|___|___|_| |  |_|_|  |__|__|___|_|__,|_| |___|___|
-	      |_|               |___|                                      
-	  
-  WpBooj :: Related
+   _ _ _     _____           _    _ _    _____   _       _     
+  | | | |___| __  |___ ___  |_|  |_|_|  |  _  |_| |_____|_|___ 
+  | | | | . | __ -| . | . | | |   _ _   |     | . |     | |   |
+  |_____|  _|_____|___|___|_| |  |_|_|  |__|__|___|_|_|_|_|_|_|
+        |_|               |___|                                
+  
+  WpBooj :: Admin
 
-	Basic Usage on Frontend:
-
-	$post_id = get_the_ID();
-	foreach( $WpBoojRelated::get( $post_id ) as $related ){
-	  echo $related->ID;
-	  echo $related->post_title;
-	  if ( has_post_thumbnail( $related->ID ) ){
-	    echo get_the_post_thumbnail( $related->ID );
-	  } else {
-	    echo 'no image avail';
-	  }
-	}
 */
 
-class WpBoojRelated {
-	
-	public static function get( $post_id, $count = 4 ){
-		$related_cache = WpBoojCache::check( $post_id = $post_id, $post_type = 'WpBoojRelated' );
-		if( $related_cache ){
-			return $related_cache;
-		}
+class WpBoojAdmin
+{
+  /**
+   * Holds the values to be used in the fields callbacks
+   */
+  private $options;
 
-		global $wpdb;
-		// Get the cat and tag ids from the given $post_id
-		$tags  = wp_get_post_tags( $post_id );
-		$tag_ids = '';
-		foreach ( $tags as $key => $tag) {
-			$tag_ids .= $tag->term_id . ',';
-		}
-		$tag_ids = substr( $tag_ids, 0, -1);	
+  public function __construct(){
+    add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
 
-		$cats  = get_the_category( $post_id );
-		$cat_ids = '';
-		foreach ( $cats as $key => $cat) {
-			$cat_ids .= $cat->term_id . ',';
-		}
-		$cat_ids = substr( $cat_ids, 0, -1);
+    add_action( 'admin_init', array( $this, 'page_init' ) );
+
+    add_action( 'admin_head', array( $this, 'booj_branding' )          );
+    add_action( 'admin_head', array( $this, 'proxy_admin_urls' )       );
+    add_action( 'admin_head', array( $this, 'plugin_management' ) );
+
+    add_action( 'show_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
+    add_action( 'edit_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
+
+    add_action( 'admin_init', array( $this, 'remove_nag' )             );
+    add_action( 'admin_head', array( $this, 'remove_nag_css' )         );
+
+  }
+
+  public function booj_branding(){
+    if( substr( get_bloginfo('version'), 0, 1 ) == '3' ){
+      ?>
+      <style type="text/css">
+        #footer-upgrade{
+          display: none;
+        }
+        #wpfooter{
+          background-image: url('<? print get_site_url(); ?>/wp-content/plugins/WpBooj/logo-enterprise-network.gif');
+          background-repeat: no-repeat;
+          background-position: right;
+        }
+      </style>
+      <?
+    }
+  }
+
+  /***********************************************************                                                          
+     _____   _       _        _____     _   _   _             
+    |  _  |_| |_____|_|___   |   __|___| |_| |_|_|___ ___ ___ 
+    |     | . |     | |   |  |__   | -_|  _|  _| |   | . |_ -|
+    |__|__|___|_|_|_|_|_|_|  |_____|___|_| |_| |_|_|_|_  |___|
+                                                     |___|    
+    Admin Settings
+  */
+
+  /**
+   * Add options page
+   */
+  public function add_plugin_page(){
+      // This page will be under "Settings"
+      add_options_page(
+          'WpBooj', 
+          'WpBooj', 
+          'manage_options', 
+          'wp-booj-admin', 
+          array( $this, 'create_admin_page' )
+      );
+  }
+
+  /**
+   * Options page callback
+   */
+  public function create_admin_page(){
+    // Set class property
+    $this->options = get_option( 'wp-booj' );
+    ?>
+    <div class="wrap">
+      <?php screen_icon(); ?>
+      <h2>WpBooj Settings</h2>           
+      <form method="post" action="options.php">
+        <?php
+          // This prints out all hidden setting fields
+          settings_fields( 'wp-booj' );   
+          do_settings_sections( 'wp-booj-admin' );
+          submit_button(); 
+        ?>
+      </form>
+    </div>
+    <?php
+  }
+
+  /**
+   * Register and add settings
+   */
+  public function page_init(){        
+    register_setting(
+      'wp-booj', // Option group
+      'wp-booj', // Option name
+      array( $this, 'sanitize' ) // Sanitize
+    );
+
+    add_settings_section(
+      'setting_section_id', // ID
+      'General Settings', // related_posts
+      array( $this, 'print_section_info' ), // Callback
+      'wp-booj-admin' // Page
+    );  
+
+    add_settings_field(
+      'proxy_admin_urls', // ID
+      'Proxy Admin Urls', // related_posts 
+      array( $this, 'proxy_admin_urls_callback' ), // Callback
+      'wp-booj-admin', // Page
+      'setting_section_id' // Section           
+    );      
+
+    add_settings_field(
+      'related_posts', 
+      'Use Related Posts', 
+      array( $this, 'related_posts_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    );
+
+    add_settings_field(
+      'relative_urls', 
+      'Use Relative Urls', 
+      array( $this, 'relative_urls_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    ); 
+
+    add_settings_field(
+      'disable_plugin_management', 
+      'Disable Plugin Management', 
+      array( $this, 'disable_plugin_management_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    );
+
+    add_settings_field(
+      'use_WpBoojCache', 
+      'Enable WpBoojCache', 
+      array( $this, 'use_WpBoojCache_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    );     
+
+  }
+
+  /**
+   * Sanitize each setting field as needed
+   *
+   * @param array $input Contains all settings fields as array keys
+   */
+  public function sanitize( $input ){
+    $new_input = array();
+    if( isset( $input['proxy_admin_urls'] ) )
+      $new_input['proxy_admin_urls'] = $input['proxy_admin_urls'] ;
+
+    if( isset( $input['related_posts'] ) )
+      $new_input['related_posts'] = $input['related_posts'];
+
+    if( isset( $input['relative_urls'] ) )
+      $new_input['relative_urls'] = $input['relative_urls'];
+
+    if( isset( $input['disable_plugin_management'] ) )
+      $new_input['disable_plugin_management'] = $input['disable_plugin_management'];
+
+    if( isset( $input['use_WpBoojCache'] ) )
+      $new_input['use_WpBoojCache'] = $input['use_WpBoojCache'];
+
+    return $new_input;
+  }
+
+  /** 
+   * Print the Section text
+   */
+  public function print_section_info(){
+    print "If you don't understand these options, you will want to leave them as they are!";
+  }
+
+  /** 
+   * Get the settings option array and print one of its values
+   */
+  public function proxy_admin_urls_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[proxy_admin_urls]" <? if( $this->options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?
+  }
+
+  public function related_posts_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[related_posts]" <? if( $this->options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?
+  }
+
+  public function relative_urls_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[relative_urls]" <? if( $this->options['relative_urls'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?
+  }
+
+  public function disable_plugin_management_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[disable_plugin_management]" <? if( $this->options['disable_plugin_management'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?
+  }
+
+  public function use_WpBoojCache_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[use_WpBoojCache]" <? if( $this->options['use_WpBoojCache'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?
+  }    
+
+  /***********************************************************
+     _____     _   _              _____     _       
+    |  _  |_ _| |_| |_ ___ ___   |     |___| |_ ___ 
+    |     | | |  _|   | . |  _|  | | | | -_|  _| .'|
+    |__|__|___|_| |_|_|___|_|    |_|_|_|___|_| |__,|
+
+    Author Meta 
+
+    Add and display extra meta data for authors
+
+  */
+
+  public function booj_profile_fields_admin_display( $user ) { 
+    ?>
+    <h3>Enterprise Network Information</h3>
+    <table class="form-table">
+      <tr>
+        <th><label for="twitter">Agent Bio Url</label></th>
+        <td>
+          <input type="text" name="agent_bio_url" id="agent_bio_url" value="<?php echo esc_attr( get_the_author_meta( 'agent_bio_url', $user->ID ) ); ?>" class="regular-text" /><br />
+          <span class="description">Please enter your agent bio page web address. (ex: http://www.clarkhawaii.com/our_agents/info/leslie-m-agorastos )</span>
+        </td>
+      </tr>
+    </table>
+    <? 
+  }
+
+  public function booj_profile_fields_save( $user_id ) {
+    if ( !current_user_can( 'edit_user', $user_id ) )
+      return false;
+    update_usermeta( $user_id, 'agent_bio_url', $_POST['agent_bio_url'] );
+  }
 
 
-		// NOW WELL LOOK FOR ALL THE OTHER POSTS / PAGES
-		// WHICH USE ANY OF THE SAME CATS / TAGS ORDERD AMMOUNT OF SIMILARITIES
-		// $potential_posts is created here
 
-		if( $tag_ids == '' && $cat_ids == ''){
-			$full_search = '';
-		} elseif( $tag_ids == '' && $cat_ids != '' ){
-			$full_search = $cat_ids;
-		} elseif( $tag_ids != '' && $cat_ids == '' ){
-			$full_search = $tag_ids;
-		}		 else {
-			$full_search = $tag_ids . "," . $cat_ids;
-		}
+  /***********************************************************
+     _____  
+    |  |  |___| |___ 
+    |  |  |  _| |_ -|
+    |_____|_| |_|___|
+  
+    Urls
 
-		$query = "SELECT DISTINCT( object_id ), COUNT(*) AS count 
-			FROM `{$wpdb->prefix}term_relationships` 
-			WHERE `term_taxonomy_id` IN( " . $full_search ." ) 
-				AND `object_id` != " . $post_id . "
-			GROUP BY 1
-			ORDER BY 2 DESC
-			LIMIT 50";
-		$rows = $wpdb->get_results( $query );
+    This updates bad urls for the admin because of our Apache Proxy
 
-		$potential_posts = array();
-		$post_ids = '';
-		foreach( $rows as $key => $row ) {
-			$potential_posts[$row->object_id] = array( 
-				'post_id'    => $row->object_id,
-				'occurance'  => $row->count,
-				'points'     => ( $row->count * 1000 ), 
-			);
-			$post_ids .= $row->object_id . ',';
-		}
-		$post_ids = substr( $post_ids, 0, -1);
+  */
 
-		// NOW WE QUERY AGAINST THE POST IDS FROM ABOVE
-		// WE ARE FILTERING OUT ANY POST WHICH IS NOT PUBLISHED
-		// $potential_posts is important here
-		$query2 = "SELECT `ID`, `post_date` FROM `{$wpdb->prefix}posts` 
-			WHERE `ID` IN( ". $post_ids ." ) 
-				AND `post_status` = 'publish'
-				AND `post_type`   = 'post'
-			ORDER BY `post_date` DESC";
+  public function proxy_admin_urls(){
+    // Update the HTTP_HOST because wordpress bases urls off of this
+    // We're removing 7 characters, 'http://' so the site_url MUST BE ex: http://www.clarkhawaii.com/
+    // @todo: Make this more robust for the above reason!
+    $options = get_option( 'wp-booj' );
+    if( $options['proxy_admin_urls'] == 'on' ){
+      if( substr( get_site_url(), 0, 7 ) == 'http://'){
+        $_SERVER['HTTP_HOST'] = substr( get_site_url(), 7 );
+      } else {
+        $_SERVER['HTTP_HOST'] = get_site_url() ;        
+      }
+      // This updates the remote_addr because of the proxy this would normally get lost
+      if ( isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
+        $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $_SERVER['REMOTE_ADDR'] = trim($ips[0]);
+      } elseif ( isset($_SERVER['HTTP_X_REAL_IP']) && !empty($_SERVER['HTTP_X_REAL_IP']) ) {
+        $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_REAL_IP'];
+      } elseif ( isset($_SERVER['HTTP_CLIENT_IP']) && !empty($_SERVER['HTTP_CLIENT_IP']) ) {
+        $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CLIENT_IP'];
+      }
 
-		$rows = $wpdb->get_results( $query2 );
-		foreach( $rows as $key => $row ) {
-			if( is_array( $potential_posts[ $row->ID ]) ){
-				$date_point_penelty = round( ( time() - strtotime( $row->post_date ) ) / 86400, 0 );
-				$potential_posts[ $row->ID ]['post']   = $row;
-				$potential_posts[ $row->ID ]['points'] = $potential_posts[ $row->ID ]['points'] - $date_point_penelty;
-			}
-		}
+      // Update the links we may have missed with this
+      // we catch all urls that start with "/" and put /blog/ ahead
+      ?>
+      <script type="text/javascript">
+        uri_segment = '<? echo WpBoojFindURISegment(); ?>';
+        uri_len     = uri_segment.length + 1;
+        jQuery(document).ready( function() {
+          jQuery('a').each( function(){
+            link = jQuery(this).attr('href');
+            if( link && link.length && link.substring( 0, 1 ) == '/' && link.substring( 0, uri_len ) != '/' +  uri_segment ){
+              jQuery(this).attr('href', '/' + uri_segment + link );
+            }
+          });
+          jQuery('form').each( function(){
+            action = jQuery(this).attr('action');
+            if( action && action.length && action.substring( 0, 1 ) == '/' && action.substring( 0, uri_len ) != '/' + uri_segment ){
+              jQuery(this).attr('action', '/' + uri_segment + action );
+            }
+          });
+        });
+      </script>
+      <?
+    }
+  }
 
-		// HERE WE COMPUTE OUR POINTS
-		$weighted_posts = array();
-		foreach( $potential_posts as $key => $value ) {
-			if( is_object( $value['post'] ) ){
-				$weighted_posts[$key] = $value['points'];			
-			} else {
-				unset( $potential_posts[$key] );
-			}
-		}
 
-		array_multisort( $weighted_posts, SORT_DESC, $potential_posts );
 
-		// NOW LETS GROOM THE LIST, MAKE SURE WE HAVE WHAT WE NEED
-		// MAKE SURE WE HAVE ENOUGH CONTENT, OTHER WISE FIND SOME
-		if( count( $potential_posts ) < $count ){
-			$ids_to_omit = $post_id . ',';
-			$posts_more_needed = $count - count( $potential_posts );
-			if( ! empty( $potential_posts ) ){
-				foreach ($potential_posts as $key => $value) {
-					$ids_to_omit .= $value['post']->ID . ',';
-				}
-			}
-			$ids_to_omit = substr( $ids_to_omit, 0, -1);			
+  /***********************************************************                      
+     _____            _____                     
+    |   | |___ ___   |   __|___ ___ ___ ___ ___ 
+    | | | | .'| . |  |__   |  _|  _| -_| -_|   |
+    |_|___|__,|_  |  |_____|___|_| |___|___|_|_|
+              |___|                             
 
-			//@todo: should just select IDS to simplify
-			$query3 = "SELECT * FROM `{$wpdb->prefix}posts` 
-				WHERE `ID` NOT IN( ". $ids_to_omit ." )
-					AND `post_status` = 'publish'  
-					AND `post_type` = 'post' 
-				ORDER BY `post_date` DESC
-				LIMIT " . $posts_more_needed;
-				
-			$rows = $wpdb->get_results( $query3 );
+    Nag Screens
 
-			foreach( $rows as $key => $row ) {
-				$potential_posts[$row->ID]['ID']   = $row->ID;
-				$potential_posts[$row->ID]['post'] = $row;
-			}
-		}
+    This removes the "Update Wordpress" nag screen from the Admin 
 
-		$posts = array();
+  */
 
-		foreach ( $potential_posts as $the_post_added ) { 
-			$posts[] = get_post( $the_post_added['post_id'] ); 
-		}
+  public function remove_nag() {
+    remove_action('admin_notices', 'update_nag', 3);
+  }
 
-		if( count( $posts ) > $count ){ $posts = array_slice( $posts, 0, $count, True ); }
+  public function remove_nag_css(){
+    ?>
+    <style type="text/css">
+      /* heres the css */
+      #wp-admin-bar-updates{ display: none; }
+      #menu-dashboard ul li a .update-count{ display: none; }
+      .plugin-count{ display: none !important; }
+    </style>
+    <?
+  }
 
-		// store a cached version if we found content
-		if( count( $posts ) == $count ){
-		  WpBoojCache::store( $post_id = $post_id, $post_type = 'WpBoojRelated', $posts );
-		}
-
-		return $posts;
-	}
+  public function plugin_management(){
+    $options = get_option( 'wp-booj' );
+    if( $options['disable_plugin_management'] == 'on' ){
+      $user = wp_get_current_user();
+      if( $user->data->user_login != 'booj' ){
+        ?>
+        <style type="text/css">
+          #menu-links { display: none; }
+          #menu-appearance { display: none; }
+          #menu-plugins { display: none; }
+          #toplevel_page_itsec { display: none; }
+        </style>
+        <?
+      }
+    }
+  }
 
 }

@@ -26,7 +26,7 @@ define( 'WP_BOOJ_PATH', plugin_dir_path( __FILE__ ) );
 require WP_BOOJ_PATH . 'includes/WpBooj.php';
 require WP_BOOJ_PATH . 'includes/WpBoojCache.php';
 
-$options = get_option( 'wp-booj' );
+$wp_booj_options = get_option( 'wp-booj' );
 
 new WpBooj();
 new WpBoojCache();
@@ -40,7 +40,7 @@ if( is_admin() ){
   new WpBoojAdmin();
 }
 
-if( $options['related_posts'] == 'on' ){
+if( $wp_booj_options['related_posts'] == 'on' ){
   require WP_BOOJ_PATH . 'includes/WpBoojRelated.php';
   $WpBoojRelated = new WpBoojRelated();
 }
@@ -59,18 +59,18 @@ function WpBooj_activate(){
   dbDelta( $WpBoojCache_table_sql );  
 }
 
-function WpBooj_deactivate(){
-}
+function WpBooj_deactivate(){ }
 
-if (! function_exists( 'wp_redirect' ) && $options['proxy_admin_urls'] == 'on' ) {
+if (! function_exists( 'wp_redirect' ) && $wp_booj_options['proxy_admin_urls'] == 'on' ) {
   function wp_redirect($location, $status = 302) {
     global $is_IIS;
 
     $location = apply_filters('wp_redirect', $location, $status);
     $status   = apply_filters('wp_redirect_status', $status, $location);
 
-    if ( !$location ) // allows the wp_redirect filter to cancel a redirect
-    return false;
+    if ( !$location ){ // allows the wp_redirect filter to cancel a redirect
+      return false;
+    }
 
     $location = wp_sanitize_redirect($location);
 
