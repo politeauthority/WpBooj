@@ -25,8 +25,7 @@
 class WpBoojRelated {
 	
 	public static function get( $post_id, $count = 4 ){
-		// Check for a cache
-		$related_cache = WpBoojCache::check_cache( $post_id );
+		$related_cache = WpBoojCache::check( $post_id = $post_id, $post_type = 'WpBoojRelated' );
 		if( $related_cache ){
 			return $related_cache;
 		}
@@ -138,7 +137,7 @@ class WpBoojRelated {
 			foreach( $rows as $key => $row ) {
 				$potential_posts[$row->ID]['ID']   = $row->ID;
 				$potential_posts[$row->ID]['post'] = $row;
-			}			
+			}
 		}
 
 		$posts = array();
@@ -151,7 +150,7 @@ class WpBoojRelated {
 
 		// store a cached version if we found content
 		if( count( $posts ) == $count ){
-			$this->__store_cache( $post_id, $posts );
+		  WpBoojCache::store( $post_id = $post_id, $post_type = 'WpBoojRelated', $posts );
 		}
 
 		return $posts;

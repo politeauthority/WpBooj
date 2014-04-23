@@ -25,23 +25,7 @@ class WpBooj {
     // Actions for feed modifications
     add_action( 'rss2_item', array( $this, 'feed_featured_image_enclosure' ) );
     add_action( 'rss2_item', array( $this, 'feed_realtor_image_enclosure' ) );
-    
-    // Listen for the plugin activate/deactivate event
-    register_activation_hook(   WP_BOOJ_FILE,   array( $this, 'activate' ) );
-    register_deactivation_hook( WP_BOOJ_FILE,   array( $this, 'deactivate' ) );
   }
-
-  public function activate() {
-    global $wpdb;
-    update_option( $this->option_name, $this->data );
-    WpBoojCache::install();
-  }
-
-  public function deactivate() {
-    delete_option( $this->option_name );
-  }
-
-
 
   /***********************************************************
      _____  
