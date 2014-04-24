@@ -25,21 +25,7 @@ class WpBooj {
     // Actions for feed modifications
     add_action( 'rss2_item', array( $this, 'feed_featured_image_enclosure' ) );
     add_action( 'rss2_item', array( $this, 'feed_realtor_image_enclosure' ) );
-    
-    // Listen for the plugin activate/deactivate event
-    register_activation_hook(   WP_BOOJ_FILE,   array( $this, 'activate' ) );
-    register_deactivation_hook( WP_BOOJ_FILE,   array( $this, 'deactivate' ) );
   }
-
-  public function activate() {
-    update_option( $this->option_name, $this->data );
-  }
-
-  public function deactivate() {
-    delete_option( $this->option_name );
-  }
-
-
 
   /***********************************************************
      _____  
@@ -261,10 +247,10 @@ class WpBooj {
       return;
     $upload_dir = wp_upload_dir();
     printf( 
-	   '<enclosure name="featured_image" url="%s" length="%s" type="%s" />',
-	   $thumbnail['url'], 
-	   filesize( path_join( $upload_dir['basedir'], $thumbnail['path'] ) ), 
-	   get_post_mime_type( $thumbnail_id ) 
+     '<enclosure name="featured_image" url="%s" length="%s" type="%s" />',
+     $thumbnail['url'], 
+     filesize( path_join( $upload_dir['basedir'], $thumbnail['path'] ) ), 
+     get_post_mime_type( $thumbnail_id ) 
     );
   }
 
@@ -286,6 +272,35 @@ class WpBooj {
     }
   }
 
+  /************************************************************                             
+     _____           _           
+    | __  |___ ___ _| |___ _____ 
+    |    -| .'|   | . | . |     |
+    |__|__|__,|_|_|___|___|_|_|_|
+                               
+    Random
+    
+  */
+  /***
+    Get Random Post
+    Desc: Will fetch a random post if the url /?random=1 is requested
+  */
+  public static function random_post(){
+    global $wp;
+    $wp->add_query_var('random');
+    add_rewrite_rule('random/?$', 'index.php?random=1', 'top');
+  }
+
+  public static function random_template() {
+    if (get_query_var('random') == 1) {
+      $posts = get_posts('post_type=post&orderby=rand&numberposts=1');
+      foreach($posts as $post) {
+        $link = get_permalink($post);
+      }
+      wp_redirect( $link, 307 );
+      exit;
+    }
+  }
 
 
   /***********************************************************                     
@@ -363,7 +378,7 @@ class WpBooj {
 
   /***
     Remove HTML, PHP, and Wordpress captions, also, truncate if desired.
-    @params:
+    @params
       $string = string of content with potential html, php or Wordpress caption code
       $length = int, length of the return string after code stripping
   */
@@ -372,31 +387,10 @@ class WpBooj {
     $butterfly = strip_tags( $butterfly );
     return $butterfly;
   }
-
-  /***
-    Get Random Post
-    Desc: Will fetch a random post if the url /?random=1 is requested
-  */
-  public static function random_post(){
-    global $wp;
-    $wp->add_query_var('random');
-    add_rewrite_rule('random/?$', 'index.php?random=1', 'top');
-  }
-
-  public static function random_template() {
-    if (get_query_var('random') == 1) {
-      $posts = get_posts('post_type=post&orderby=rand&numberposts=1');
-      foreach($posts as $post) {
-        $link = get_permalink($post);
-      }
-      wp_redirect( $link, 307 );
-      exit;
-    }
-  }
   
   /***
    Get Post Thumbnail
-   @params:
+   @params
      $post_id       = (int)
      $size          = array( int, int )
      $default_image = (str) url of fallback image
