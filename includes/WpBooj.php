@@ -424,7 +424,13 @@ class WpBooj {
     $users = $wpdb->get_results( $sql  );
     return $users;
   }
-
+  
+  /***
+    Get Page Info
+    Gets pagination info from the url and ships it out
+    @return
+      bool or int( ) page number
+  */
   public static function get_page_info( ){
     if ( strpos( $_SERVER['REQUEST_URI'], 'page/') !== FALSE || strpos( $_SERVER['REQUEST_URI'], '?paged=') !== FALSE ){
       if( strpos( $_SERVER['REQUEST_URI'], 'page/') !== FALSE ){
