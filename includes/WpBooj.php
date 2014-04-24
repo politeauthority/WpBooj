@@ -425,6 +425,21 @@ class WpBooj {
     return $users;
   }
 
+  public static function get_page_info( ){
+    if ( strpos( $_SERVER['REQUEST_URI'], 'page/') !== FALSE || strpos( $_SERVER['REQUEST_URI'], '?paged=') !== FALSE ){
+      if( strpos( $_SERVER['REQUEST_URI'], 'page/') !== FALSE ){
+        $page_num = explode( ',', $_SERVER['REQUEST_URI'] );
+        $page_num = $page_num[1];
+      } elseif ( strpos( $_SERVER['REQUEST_URI'], '?paged=') !== FALSE ) {
+        $page_num = explode( '?paged=', $_SERVER['REQUEST_URI'] );
+        $page_num = $page_num[1];
+      }
+      return $page_num;
+    } else {
+      return False;
+    }    
+  }
+  
 }
 
 /* ENDFILE: includes/WpBooj.php */
