@@ -428,8 +428,8 @@ class WpBooj {
   public static function get_page_info( ){
     if ( strpos( $_SERVER['REQUEST_URI'], 'page/') !== FALSE || strpos( $_SERVER['REQUEST_URI'], '?paged=') !== FALSE ){
       if( strpos( $_SERVER['REQUEST_URI'], 'page/') !== FALSE ){
-        $page_num = explode( ',', $_SERVER['REQUEST_URI'] );
-        $page_num = $page_num[1];
+        $page_num = explode( '/', $_SERVER['REQUEST_URI'] );
+        $page_num = $page_num[2];
       } elseif ( strpos( $_SERVER['REQUEST_URI'], '?paged=') !== FALSE ) {
         $page_num = explode( '?paged=', $_SERVER['REQUEST_URI'] );
         $page_num = $page_num[1];
@@ -439,7 +439,7 @@ class WpBooj {
       return False;
     }    
   }
-  
+
 }
 
 /* ENDFILE: includes/WpBooj.php */
