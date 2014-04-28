@@ -155,3 +155,5 @@ class WpBoojRelated {
 	}
 
 }
+
+/* ENDFILE: includes/WpBoojRelated.php */

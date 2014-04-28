@@ -48,13 +48,13 @@ if( $WpBooj_options['related_posts'] == 'on' ){
 function WpBooj_activate(){
   global $wpdb;
   $WpBoojCache_table_sql = "CREATE TABLE {$wpdb->prefix}WpBoojCache (
-          `cache_id` int(11) NOT NULL AUTO_INCREMENT,
-          `post_id` int(11) DEFAULT NULL,
-          `type` varchar(255) DEFAULT NULL,
-          `data` longtext DEFAULT NULL,
-          `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-           PRIMARY KEY (`cache_id`)
-           ) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
+    `cache_id` int(11) NOT NULL AUTO_INCREMENT,
+    `post_id` int(11) DEFAULT NULL,
+    `type` varchar(255) DEFAULT NULL,
+    `data` longtext DEFAULT NULL,
+    `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+     PRIMARY KEY (`cache_id`)
+     ) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
   require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
   dbDelta( $WpBoojCache_table_sql );  
 }
@@ -101,4 +101,4 @@ function WpBoojFindURISegment(){
   return $uri;
 }
 
-?>
+/* End File wp_booj.php */
