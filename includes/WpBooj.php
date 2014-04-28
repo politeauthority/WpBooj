@@ -419,7 +419,7 @@ class WpBooj {
     if( $order_by ){
       $sql .= " ORDER BY {$order_by} ASC;";
     } else {
-      $sql = ";";
+      $sql .= ";";
     }
     $users = $wpdb->get_results( $sql  );
     return $users;
