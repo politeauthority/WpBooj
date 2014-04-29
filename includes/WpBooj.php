@@ -148,7 +148,7 @@ class WpBooj {
       if( isset( $WpBooj_options['use_WpBoojCache'] ) && $WpBooj_options['use_WpBoojCache'] == 'on' ){
         $popular_cache = WpBoojCache::check( $post_id = 0, $type = 'WpBoojTopPosts' );
         if( $popular_cache ){
-          return $popular_cache;
+          return $popular_cache;	  
         }
       }
       global $wpdb;
@@ -172,10 +172,12 @@ class WpBooj {
         $popular[$key]['post_title'] = $post->post_title;
         $popular[$key]['post_slug']  = $post->post_name;
         $popular[$key]['post_date']  = $post->post_date;
-        $popular[$key]['url']      = '/' . date( 'Y/m/', strtotime( $popular[$key]['post_date'] ) ) . $popular[$key]['post_slug'];
+        $popular[$key]['url']      = '/' . WpBoojFindURISegment() . '/' . date( 'Y/m/', strtotime( $popular[$key]['post_date'] ) ) . $popular[$key]['post_slug'];
       }
       if( count( $popular ) == $count ){
+	
         WpBoojCache::store( $post_id = 0, $post_type = 'WpBoojTopPosts', $popular );  
+	die('storing a cache!');
       }
       return $popular;
     } else {

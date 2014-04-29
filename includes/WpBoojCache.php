@@ -60,7 +60,8 @@ class WpBoojCache {
 			`post_type` = '$post_type' 
 			ORDER BY `last_update_ts` 
 			DESC LIMIT 1;";
-		$response = $wpdb->query( $sql );
+		$response = $wpdb->get_results( $sql );
+		print_r( $response ); die();
 		if( count( $response ) > 0 ){
 			$sql = "UPDATE {$wpdb->prefix}WpBoojCache SET 
 				`data` = '{$data}'
@@ -71,6 +72,8 @@ class WpBoojCache {
 				( `type`,`post_id`,`data` ) 
 				VALUES( '$post_type', '$post_id', '$data' );";
 		}
+		echo 'heres sql';
+		die( $sql );
 		$wpdb->query( $sql );
 	}
 
