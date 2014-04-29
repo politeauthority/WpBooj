@@ -8,7 +8,6 @@
 	  
   WpBooj :: Related
 
-
 	Basic Usage on Frontend:
 
 	$post_id = get_the_ID();
@@ -20,12 +19,17 @@
 	  } else {
 	    echo 'no image avail';
 	  }
-	}	
+	}
 */
 
 class WpBoojRelated {
 	
 	public static function get( $post_id, $count = 4 ){
+		$related_cache = WpBoojCache::check( $post_id = $post_id, $type = 'WpBoojRelated' );
+		if( $related_cache ){
+			return $related_cache;
+		}
+
 		global $wpdb;
 		// Get the cat and tag ids from the given $post_id
 		$tags  = wp_get_post_tags( $post_id );
@@ -41,7 +45,6 @@ class WpBoojRelated {
 			$cat_ids .= $cat->term_id . ',';
 		}
 		$cat_ids = substr( $cat_ids, 0, -1);
-
 
 		// NOW WELL LOOK FOR ALL THE OTHER POSTS / PAGES
 		// WHICH USE ANY OF THE SAME CATS / TAGS ORDERD AMMOUNT OF SIMILARITIES
@@ -133,18 +136,24 @@ class WpBoojRelated {
 			foreach( $rows as $key => $row ) {
 				$potential_posts[$row->ID]['ID']   = $row->ID;
 				$potential_posts[$row->ID]['post'] = $row;
-			}			
+			}
 		}
 
 		$posts = array();
-
 		foreach ( $potential_posts as $the_post_added ) { 
 			$posts[] = get_post( $the_post_added['post_id'] ); 
 		}
 
 		if( count( $posts ) > $count ){ $posts = array_slice( $posts, 0, $count, True ); }
 
+		// store a cached version if we found content
+		if( count( $posts ) == $count ){
+		  WpBoojCache::store( $post_id = $post_id, $post_type = 'WpBoojRelated', $posts );
+		}
+
 		return $posts;
 	}
 
 }
+
+/* ENDFILE: includes/WpBoojRelated.php */

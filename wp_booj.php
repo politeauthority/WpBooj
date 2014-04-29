@@ -1,53 +1,75 @@
 <?php
 /*
-Plugin Name: WP Booj
+Plugin Name: WpBooj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: 1.081
+Version: 1.20
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
-Release Date: 2014-04-21
+Release Date: 2014-04-28
 
 This version currently supports; 
-- Enterprise Branding Footer
-- Adds author meta options in admin, see README.md for front-end ussage.
+- Adds author meta options in admin
 - Facebook status integration.
 - Random post button
-- Related Posts
+- Related posts
+- Cahce anywhere caching
+- Proxy url resolution from proxies
 
-Developer Features
+Developer Notes
 - Supports variable table prefixes
-- Removes "update nag screen" from all views. 
-- Fixes ALL admin url breaks that can come about in Apache proxies
 
 */
 
 define( 'WP_BOOJ_PATH', plugin_dir_path( __FILE__ ) );
 require WP_BOOJ_PATH . 'includes/WpBooj.php';
+require WP_BOOJ_PATH . 'includes/WpBoojCache.php';
 
-$options = get_option( 'wp-booj' );
+$WpBooj_options = get_option( 'wp-booj' );
 
 new WpBooj();
+new WpBoojCache();
+
+// Listen for the plugin activate/deactivate event
+register_activation_hook(   __FILE__,   'WpBooj_activate' );
+register_deactivation_hook( __FILE__,   'WpBooj_deactivate'  );
 
 if( is_admin() ){
   require WP_BOOJ_PATH . 'includes/WpBoojAdmin.php';
   new WpBoojAdmin();
 }
 
-if( $options['related_posts'] == 'on' ){
+if( $WpBooj_options['related_posts'] == 'on' ){
   require WP_BOOJ_PATH . 'includes/WpBoojRelated.php';
   $WpBoojRelated = new WpBoojRelated();
 }
 
-if (! function_exists( 'wp_redirect' ) && $options['proxy_admin_urls'] == 'on' ) {
+function WpBooj_activate(){
+  global $wpdb;
+  $WpBoojCache_table_sql = "CREATE TABLE {$wpdb->prefix}WpBoojCache (
+    `cache_id` int(11) NOT NULL AUTO_INCREMENT,
+    `post_id` int(11) DEFAULT NULL,
+    `type` varchar(255) DEFAULT NULL,
+    `data` longtext DEFAULT NULL,
+    `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+     PRIMARY KEY (`cache_id`)
+     ) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
+  require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+  dbDelta( $WpBoojCache_table_sql );  
+}
+
+function WpBooj_deactivate(){ }
+
+if (! function_exists( 'wp_redirect' ) && $WpBooj_options['proxy_admin_urls'] == 'on' ) {
   function wp_redirect($location, $status = 302) {
     global $is_IIS;
 
     $location = apply_filters('wp_redirect', $location, $status);
     $status   = apply_filters('wp_redirect_status', $status, $location);
 
-    if ( !$location ) // allows the wp_redirect filter to cancel a redirect
-    return false;
+    if ( !$location ){ // allows the wp_redirect filter to cancel a redirect
+      return false;
+    }
 
     $location = wp_sanitize_redirect($location);
 
@@ -78,4 +100,4 @@ function WpBoojFindURISegment(){
   return $uri;
 }
 
-?>
+/* End File wp_booj.php */

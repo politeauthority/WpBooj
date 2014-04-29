@@ -38,14 +38,14 @@ class WpBooj {
   */
 
   public function relative_urls(){
-    $options = get_option( 'wp-booj' );
-    if( $options['relative_urls'] == 'on' ){
+    global $WpBooj_options;
+    if( $WpBooj_options['relative_urls'] == 'on' ){
       $headers         = apache_request_headers();
       $blog_url        = get_bloginfo( 'wpurl' );
       $blog_url_strip  = str_replace( array( 'http://', 'www'), '', $blog_url );
       if( $blog_url_strip != $headers['Host'] ){
         $blog_url = 'www.' . $blog_url;
-        if ( $options['proxy_admin_urls'] == 'on' && isset( $headers['X-Forwarded-Host'] ) ){
+        if ( $WpBooj_options['proxy_admin_urls'] == 'on' && isset( $headers['X-Forwarded-Host'] ) ){
           $blog_url .= '/blog/';
         }
       } else {
@@ -62,8 +62,8 @@ class WpBooj {
     Stops users and bots from accessing the active-clients.com location  
   */
   public function redirect_activeclients(){
-    $options = get_option( 'wp-booj' );
-    if( $options['proxy_admin_urls'] == 'on' && ! isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ){
+    global $WpBooj_options;
+    if( $WpBooj_options['proxy_admin_urls'] == 'on' && ! isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ){
       header( 'Location: ' . get_site_url() . '/' );   
     }
   }
@@ -75,8 +75,8 @@ class WpBooj {
   */
   public function x_forwarded(){
     global $_SERVER;
-    $options = get_option( 'wp-booj' );
-    if( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) && $options['proxy_admin_urls'] == 'on' ){
+    global $WpBooj_options;
+    if( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) && $WpBooj_options['proxy_admin_urls'] == 'on' ){
       if( strpos( $_SERVER['HTTP_X_FORWARDED_FOR'], ',' ) !== False ){
         $new_remote_addr = explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] );
         $new_remote_addr = $new_remote_addr[0];
@@ -127,30 +127,44 @@ class WpBooj {
 
   /***
     GET TOP POSTS
-    Description - Collects the posts with the most views for the current blog. 
+    @desc: Collects the posts with the most views for the current blog. 
       This is done through wordpress meta_key meta_value store for posts
       
-    Requires - Wp_PostViews
+    @requirements: Wp_PostViews
 
-    Usage -
+    @usage:
       foreach( WpBooj::get_top_posts( 5 ) as $post ){ echo $post['post_title']; }
 
-    Args -
+    @params:
       $count ( defaults 5 )
 
-    Return - 
-      array
+    @return: 
+      array()
    */
   public static function get_top_posts( $count = 5 ){
     include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
     if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
+      global $WpBooj_options;
+      if( isset( $WpBooj_options['use_WpBoojCache'] ) && $WpBooj_options['use_WpBoojCache'] == 'on' ){
+        $popular_cache = WpBoojCache::check( $post_id = 0, $type = 'WpBoojTopPosts' );
+        if( $popular_cache ){
+          return $popular_cache;	  
+        }
+      }
       global $wpdb;
-      $sql = "SELECT posts.ID, meta.meta_value, posts.post_title, posts.post_name, posts.post_date FROM `{$wpdb->prefix}postmeta` as meta
-             INNER JOIN `{$wpdb->prefix}posts` as posts
-             ON meta.post_id  = posts.ID
-             WHERE `meta_key` = 'views' ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
+      $sql = "SELECT 
+          posts.ID, 
+          meta.meta_value, 
+          posts.post_title, 
+          posts.post_name, 
+          posts.post_date 
+        FROM `{$wpdb->prefix}postmeta` as meta
+        INNER JOIN `{$wpdb->prefix}posts` as posts
+        ON meta.post_id  = posts.ID
+        WHERE `meta_key` = 'views' 
+        ORDER BY CAST( `meta_value` AS DECIMAL ) DESC 
+        LIMIT " . $count;
       $posts = $wpdb->get_results( $sql  );
-
       $popular = array();
       foreach( $posts as $key => $post ){
         $popular[$key]['post_id']    = $post->ID;
@@ -158,10 +172,14 @@ class WpBooj {
         $popular[$key]['post_title'] = $post->post_title;
         $popular[$key]['post_slug']  = $post->post_name;
         $popular[$key]['post_date']  = $post->post_date;
-        $popular[$key]['url']      = '/' . date( 'Y/m/', strtotime( $popular[$key]['post_date'] ) ) . $popular[$key]['post_slug'];
+        $popular[$key]['url']      = '/' . WpBoojFindURISegment() . '/' . date( 'Y/m/', strtotime( $popular[$key]['post_date'] ) ) . $popular[$key]['post_slug'];
+      }
+      if( count( $popular ) == $count ){
+	
+        WpBoojCache::store( $post_id = 0, $post_type = 'WpBoojTopPosts', $popular );  
+	die('storing a cache!');
       }
       return $popular;
-
     } else {
       return 'Please install and enable the plugin "Wp Post Views"';
     }
@@ -171,15 +189,17 @@ class WpBooj {
     include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
     if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
       global $wpdb;
-      $sql = "SELECT posts.`ID`, meta.`meta_value`
-            FROM `{$wpdb->prefix}postmeta` as meta
-             INNER JOIN `{$wpdb->prefix}posts` as posts
-             ON meta.`post_id`  = posts.`ID`
-             WHERE 
-               meta.`meta_key` = 'views' 
-               AND posts.`post_type` = 'post'
-               AND posts.`post_status` = 'publish'
-            ORDER BY CAST( `meta_value` AS DECIMAL ) DESC LIMIT " . $count;
+      $sql = "SELECT 
+          posts.`ID`, 
+          meta.`meta_value`
+        FROM `{$wpdb->prefix}postmeta` as meta
+        INNER JOIN `{$wpdb->prefix}posts` as posts
+        ON meta.`post_id`  = posts.`ID`
+        WHERE meta.`meta_key` = 'views' AND 
+          posts.`post_type` = 'post'AND 
+          posts.`post_status` = 'publish'
+        ORDER BY CAST( `meta_value` AS DECIMAL ) DESC 
+        LIMIT " . $count;
       $posts = $wpdb->get_results( $sql  );
       $popular = array();
       foreach( $posts as $key => $post ){

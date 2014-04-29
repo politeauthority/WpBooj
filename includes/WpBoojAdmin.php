@@ -143,7 +143,15 @@ class WpBoojAdmin
       array( $this, 'disable_plugin_management_callback' ), 
       'wp-booj-admin', 
       'setting_section_id'
-    ); 
+    );
+
+    add_settings_field(
+      'use_WpBoojCache', 
+      'Enable WpBoojCache', 
+      array( $this, 'use_WpBoojCache_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    );     
 
   }
 
@@ -165,6 +173,9 @@ class WpBoojAdmin
 
     if( isset( $input['disable_plugin_management'] ) )
       $new_input['disable_plugin_management'] = $input['disable_plugin_management'];
+
+    if( isset( $input['use_WpBoojCache'] ) )
+      $new_input['use_WpBoojCache'] = $input['use_WpBoojCache'];
 
     return $new_input;
   }
@@ -203,12 +214,17 @@ class WpBoojAdmin
     <?
   }
 
+  public function use_WpBoojCache_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[use_WpBoojCache]" <? if( $this->options['use_WpBoojCache'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?
+  }    
+
   /***********************************************************
      _____     _   _              _____     _       
     |  _  |_ _| |_| |_ ___ ___   |     |___| |_ ___ 
     |     | | |  _|   | . |  _|  | | | | -_|  _| .'|
     |__|__|___|_| |_|_|___|_|    |_|_|_|___|_| |__,|
-  
 
     Author Meta 
 
