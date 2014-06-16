@@ -448,8 +448,7 @@ class WpBooj {
   /***
     Get Page Info
     Gets pagination info from the url and ships it out
-    @return
-      bool or int( ) page number
+    @return bool or int( ) page number
   */
   public static function get_page_info( ){
     if ( strpos( $_SERVER['REQUEST_URI'], 'page/') !== FALSE || strpos( $_SERVER['REQUEST_URI'], '?paged=') !== FALSE ){
@@ -464,6 +463,30 @@ class WpBooj {
     } else {
       return False;
     }    
+  }
+
+  /***
+    Get Page Title
+    A more controllable way to manage blog titles for SEO
+    @params
+     $delimeter = str() delimter to use when separating title items
+    @return str()
+  */
+  public static function get_page_title( $delimeter = '|' ){
+    $blog_title = get_bloginfo( 'name' );
+    $blog_desc  = get_bloginfo( 'description' );
+    $title      = '';
+    if( is_front_page() || is_home() ){
+      $title = $blog_title;
+      if( ! empty( $blog_desc ) ){
+	$title .= ' ' . $delimeter . ' ' . $blog_desc;
+      }
+      return $title;
+    }
+    if ( is_single() ){
+      $title .= get_the_title() . ' ' . $delimeter . ' ' . $blog_title;
+      return $title;
+    }
   }
 
 }
