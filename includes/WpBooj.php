@@ -464,6 +464,30 @@ class WpBooj {
     }    
   }
 
+  /***
+    Get Page Title
+      A more controllable way to manage blog titles for SEO
+    @params
+      $delimeter = str() delimter to use when separating title items
+    @return str()
+  */
+  public static function get_page_title( $delimeter = '|' ){
+    $blog_title = get_bloginfo( 'name' );
+    $blog_desc  = get_bloginfo( 'description' );
+    $title      = '';
+    if( is_front_page() || is_home() ){
+      $title = $blog_title;
+      if( ! empty( $blog_desc ) ){
+        $title .= ' ' . $delimeter . ' ' . $blog_desc;
+       }
+       return $title;
+     }
+    if ( is_single() ){
+      $title .= get_the_title() . ' ' . $delimeter . ' ' . $blog_title;
+      return $title;
+    }
+   }
+
 }
 
 /* ENDFILE: includes/WpBooj.php */
