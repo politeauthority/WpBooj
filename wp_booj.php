@@ -3,7 +3,7 @@
 Plugin Name: WpBooj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: 1.25
+Version: 1.26
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
 Release Date: 2014-06-16

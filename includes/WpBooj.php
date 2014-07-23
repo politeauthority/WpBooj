@@ -377,6 +377,7 @@ class WpBooj {
   }
   
   public static function truncate_by_word( $string, $length ){
+    $string       = WpBooj::removeCode( $string );    
     $words        = explode( ' ', $string );
     $truncated    = '';
     $letter_count = 0;
