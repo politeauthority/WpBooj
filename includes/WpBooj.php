@@ -259,14 +259,15 @@ class WpBooj {
     if ( ! has_post_thumbnail() )
       return;
     $thumbnail_size = apply_filters( 'rss_enclosure_image_size', 'thumbnail' );
-    $thumbnail_id = get_post_thumbnail_id( get_the_ID() );
-    $thumbnail = image_get_intermediate_size( $thumbnail_id, $thumbnail_size );
+    $thumbnail_id   = get_post_thumbnail_id( get_the_ID() );
+    $thumbnail      = wp_get_attachment_image_src( $thumbnail_id, 'full' );
+    // @todo: Get the proper file size for the "length" attribute 
     if ( empty( $thumbnail ) )
       return;
     $upload_dir = wp_upload_dir();
     printf( 
      '<enclosure name="featured_image" url="%s" length="%s" type="%s" />',
-     $thumbnail['url'], 
+     $thumbnail[0], 
      filesize( path_join( $upload_dir['basedir'], $thumbnail['path'] ) ), 
      get_post_mime_type( $thumbnail_id ) 
     );
