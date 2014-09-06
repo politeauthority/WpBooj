@@ -3,7 +3,7 @@
 Plugin Name: WpBooj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: 1.26
+Version: 1.30
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
 Release Date: 2014-06-16
@@ -14,7 +14,8 @@ This version currently supports;
 - Random post button
 - Related posts
 - Cahce anywhere caching
-- Proxy url resolution from proxies
+- Proxy url resolution from Apache proxies
+- Rebrandable support, allowing multi-domain resolution
 
 Developer Notes
 - Supports variable table prefixes

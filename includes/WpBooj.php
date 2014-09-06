@@ -38,32 +38,63 @@ class WpBooj {
   */
 
   public function relative_urls(){
+    /***
+      This allows for a single blog to properly resolve to multiple domains,
+      while still supporting the apache proxy from Enterprise app servers.
+
+      This function is called at wp_head, may want to move to init.
+    */
+    global $WpBooj_options;
+    if( $WpBooj_options['relative_urls'] == 'on' ){
+      $rebranded = WpBooj::get_dynamic_url();
+      if( $rebranded[1] ){
+        define( 'WP_SITEURL', $rebranded[0] );
+        define( 'WP_HOME',    $rebranded[0] );
+      }
+    }
+  }
+
+  public function get_dynamic_url(){
+    /***
+      This does most of the work for Relative Urls ( relative_urls )
+      Looks for proxy and a differing X-Forwarded-Host then the Wordpress
+      site_url it will return the correct url to resolve to and if it had 
+      to adjust the url or not.
+      @return array(
+        $correct_url : str,  url to use regaurdless of dynamics,
+        $changed     : bool, weather or not the change is dynamic.
+      )
+    */    
     global $WpBooj_options;
     if( $WpBooj_options['relative_urls'] == 'on' ){
       $headers         = apache_request_headers();
       $blog_url        = get_bloginfo( 'wpurl' );
       $blog_url_strip  = str_replace( array( 'http://', 'www'), '', $blog_url );
-      if( $blog_url_strip != $headers['Host'] ){
-        $blog_url = 'www.' . $blog_url;
-        if ( $WpBooj_options['proxy_admin_urls'] == 'on' && isset( $headers['X-Forwarded-Host'] ) ){
-          $blog_url .= '/blog/';
-        }
-      } else {
-        $blog_url = get_bloginfo( 'wpurl' );
+      $rebranded = ( isset($headers['X-Forwarded-Host'] ) && $headers['X-Forwarded-Host'] != $blog_url_strip ) ? $headers['X-Forwarded-Host'] : false  ;
+      if( $rebranded && $WpBooj_options['proxy_admin_urls'] == 'on' ){
+        $rebranded .= '/blog/';
+      } elseif ( $rebranded ){
+        $rebranded .= '/';
       }
-      return $blog_url;
-      //   this section is sourced from mcgurie where we pulled this off nicely.
-      // $rebranded = (isset($headers['X-Forwarded-Host']) && $headers['X-Forwarded-Host'] != $blog_url ) ? $headers['X-Forwarded-Host'] : false  ;
-      // if( $rebranded != 'www.mcgurie.com' ){ $site_home = 'http://' . $rebranded; }
+      if( $rebranded ){
+        $rebranded = 'http://' . $rebranded;
+        return array( $rebranded, True );
+      }
     }
+    return array( $blog_url, False );
   }
 
-  /***
-    Stops users and bots from accessing the active-clients.com location  
-  */
   public function redirect_activeclients(){
+    /***
+      Stops users and bots from accessing the active-clients.com location
+      @todo : this could create a potential redirect loop, should update.
+    */
     global $WpBooj_options;
-    if( $WpBooj_options['proxy_admin_urls'] == 'on' && ! isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ){
+    if( 
+      $WpBooj_options['proxy_admin_urls'] == 'on' && 
+      ! isset( $_SERVER['HTTP_X_FORWARDED_HOST'] )
+      )
+    {
       header( 'Location: ' . get_site_url() . '/' );   
     }
   }
