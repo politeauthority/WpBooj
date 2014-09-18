@@ -151,7 +151,15 @@ class WpBoojAdmin
       array( $this, 'use_WpBoojCache_callback' ), 
       'wp-booj-admin', 
       'setting_section_id'
-    );     
+    );
+
+    add_settings_field(
+      'use_WpBoojDebug',
+      'Enable Debugger',
+      array( $this, 'use_WpBoojDebug_callback' ),
+		  'wp-booj-admin',
+      'setting_section_id'
+		);
 
   }
 
@@ -176,6 +184,9 @@ class WpBoojAdmin
 
     if( isset( $input['use_WpBoojCache'] ) )
       $new_input['use_WpBoojCache'] = $input['use_WpBoojCache'];
+    
+    if( isset( $input['use_WpBoojDebug'] ) )
+      $new_input['use_WpBoojDebug'] = $input['use_WpBoojDebug'];
 
     return $new_input;
   }
@@ -217,6 +228,12 @@ class WpBoojAdmin
   public function use_WpBoojCache_callback(){
     ?>
     <input type="checkbox" name="wp-booj[use_WpBoojCache]" <? if( $this->options['use_WpBoojCache'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?
+  }
+
+  public function use_WpBoojDebug_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[use_WpBoojDebug]" <? if( $this->options['use_WpBoojDebug'] == 'on' ){ echo 'checked="checked"'; } ?> />        
     <?
   }    
 

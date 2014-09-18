@@ -3,7 +3,7 @@
 Plugin Name: WpBooj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: 1.30
+Version: 1.50
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
 Release Date: 2014-06-16
@@ -16,6 +16,7 @@ This version currently supports;
 - Cahce anywhere caching
 - Proxy url resolution from Apache proxies
 - Rebrandable support, allowing multi-domain resolution
+- Query debugger.
 
 Developer Notes
 - Supports variable table prefixes
@@ -43,6 +44,10 @@ if( is_admin() ){
 if( $WpBooj_options['related_posts'] == 'on' ){
   require WP_BOOJ_PATH . 'includes/WpBoojRelated.php';
   $WpBoojRelated = new WpBoojRelated();
+}
+
+if( $WpBooj_options['use_WpBoojDebug'] == 'on' ){
+  require WP_BOOJ_PATH . 'includes/WpBoojDebug.php';
 }
 
 function WpBooj_activate(){
