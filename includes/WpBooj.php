@@ -173,34 +173,35 @@ class WpBooj {
       array()
    */
   public static function get_top_posts( $count = 5, $months_back = False ){
+  public static function get_top_posts( $count = 5, $months_back = False ){
     include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
     if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
       global $WpBooj_options;
       if( isset( $WpBooj_options['use_WpBoojCache'] ) && $WpBooj_options['use_WpBoojCache'] == 'on' ){
         $popular_cache = WpBoojCache::check( $post_id = 0, $type = 'WpBoojTopPosts' );
         if( $popular_cache ){
-          return $popular_cache;	  
+          return $popular_cache;
         }
       }
       if( $months_back ){
         $_1_month = 2678400;
         $time_back = date( 'Y-m-d', ( time() - ( $_1_month * $months_back ) ) );
-        $where_append = ' AND `posts.post_date` > "' . $time_back . '" ';
+        $where_append = ' AND `posts`.`post_date` > "' . $time_back . '" ';
       } else {
         $where_append = '';
       }
       global $wpdb;
-      $sql = "SELECT 
-          posts.ID, 
-          meta.meta_value, 
-          posts.post_title, 
-          posts.post_name, 
-          posts.post_date 
-        FROM `{$wpdb->prefix}postmeta` as meta
-        INNER JOIN `{$wpdb->prefix}posts` as posts
-        ON meta.post_id  = posts.ID
-        WHERE meta.meta_key = 'views' ". $where_append ."
-        ORDER BY CAST( `meta_value` AS DECIMAL ) DESC 
+      $sql = "SELECT                                                                                                                                                                                                                           
+          posts.ID,                                                                                                                                                                                                                            
+          meta.meta_value,                                                                                                                                                                                                                     
+          posts.post_title,                                                                                                                                                                                                                    
+          posts.post_name,                                                                                                                                                                                                                     
+          posts.post_date                                                                                                                                                                                                                      
+        FROM `{$wpdb->prefix}postmeta` as meta                                                                                                                                                                                                 
+        INNER JOIN `{$wpdb->prefix}posts` as posts                                                                                                                                                                                             
+        ON `meta`.`post_id`  = posts.ID                                                                                                                                                                                                        
+        WHERE `meta`.`meta_key` = 'views' ". $where_append ."                                                                                                                                                                                  
+        ORDER BY CAST( `meta_value` AS DECIMAL ) DESC                                                                                                                                                                                          
         LIMIT " . $count;
       $posts = $wpdb->get_results( $sql  );
       $popular = array();
@@ -213,7 +214,7 @@ class WpBooj {
         $popular[$key]['url']      = '/' . WpBoojFindURISegment() . '/' . date( 'Y/m/', strtotime( $popular[$key]['post_date'] ) ) . $popular[$key]['post_slug'];
       }
       if( count( $popular ) == $count && isset( $WpBooj_options['use_WpBoojCache'] ) && $WpBooj_options['use_WpBoojCache'] == 'on' ){
-        WpBoojCache::store( $post_id = 0, $post_type = 'WpBoojTopPosts', $popular );  
+        WpBoojCache::store( $post_id = 0, $post_type = 'WpBoojTopPosts', $popular );
       }
       return $popular;
     } else {

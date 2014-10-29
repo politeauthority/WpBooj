@@ -70,18 +70,20 @@ function dump_stops($in = null) {
   global $sem_stops;
   global $wp_object_cache;
   $stops = '';
-  foreach ( $sem_stops as $where => $stop )
-    $stops .= "$where: $stop\n";
-  dump("\n" . trim($stops) . "\n");
-  if ( defined('SAVEQUERIES') && $_GET['debug'] == 'sql' ) {
-    global $wpdb;
-    foreach ( $wpdb->queries as $key => $data ) {
-      $query = rtrim($data[0]);
-      $duration = number_format($data[1] * 1000, 1) . 'ms';
-      $loc = trim($data[2]);
-      $loc = preg_replace("/(require|include)(_once)?,\s*/ix", '', $loc);
-      $loc = "\n" . preg_replace("/,\s*/", ",\n", $loc) . "\n";
-      dump($query, $duration, $loc);
+  if( is_array( $sem_stops ) ){
+    foreach ( $sem_stops as $where => $stop )
+      $stops .= "$where: $stop\n";
+    dump("\n" . trim($stops) . "\n");
+    if ( defined('SAVEQUERIES') && $_GET['debug'] == 'sql' ) {
+      global $wpdb;
+      foreach ( $wpdb->queries as $key => $data ) {
+        $query = rtrim($data[0]);
+        $duration = number_format($data[1] * 1000, 1) . 'ms';
+        $loc = trim($data[2]);
+        $loc = preg_replace("/(require|include)(_once)?,\s*/ix", '', $loc);
+        $loc = "\n" . preg_replace("/,\s*/", ",\n", $loc) . "\n";
+        dump($query, $duration, $loc);
+      }
     }
   }
   if ( $_GET['debug'] == 'cache' )
