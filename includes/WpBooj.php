@@ -172,7 +172,7 @@ class WpBooj {
     @return: 
       array()
    */
-  public static function get_top_posts( $count = 5 ){
+  public static function get_top_posts( $count = 5, $months_back = False ){
     include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
     if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
       global $WpBooj_options;
@@ -181,6 +181,13 @@ class WpBooj {
         if( $popular_cache ){
           return $popular_cache;	  
         }
+      }
+      if( $months_back ){
+        $_1_month = 2678400;
+        $time_back = date( 'Y-m-d', ( time() - ( $_1_month * $months_back ) ) );
+        $where_append = ' AND `posts.post_date` > "' . $time_back . '" ';
+      } else {
+        $where_append = '';
       }
       global $wpdb;
       $sql = "SELECT 
@@ -192,7 +199,7 @@ class WpBooj {
         FROM `{$wpdb->prefix}postmeta` as meta
         INNER JOIN `{$wpdb->prefix}posts` as posts
         ON meta.post_id  = posts.ID
-        WHERE `meta_key` = 'views' 
+        WHERE meta.meta_key = 'views' ". $where_append ."
         ORDER BY CAST( `meta_value` AS DECIMAL ) DESC 
         LIMIT " . $count;
       $posts = $wpdb->get_results( $sql  );
