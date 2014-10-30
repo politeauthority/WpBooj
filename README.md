@@ -1,4 +1,4 @@
-WpBooj
+WpBooj  v1.6
 =======
 
 This is a plugin for Wordpress. Primarily Wordpress 3+

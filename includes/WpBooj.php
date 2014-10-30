@@ -173,7 +173,6 @@ class WpBooj {
       array()
    */
   public static function get_top_posts( $count = 5, $months_back = False ){
-  public static function get_top_posts( $count = 5, $months_back = False ){
     include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
     if( is_plugin_active( 'wp-postviews/wp-postviews.php' ) ){
       global $WpBooj_options;
@@ -529,6 +528,20 @@ class WpBooj {
     }
    }
 
+  public static function get_post_from_category( $category ){
+    $args = array(
+      'category_name'    => $category,      
+      'posts_per_page'   => 1,
+      'orderby'          => 'post_date',
+      'offset'           => 0,
+      'order'            => 'DESC',
+      'post_type'        => 'post',
+      'post_status'      => 'publish'
+
+    );
+    $posts = get_posts( $args );
+    return $posts[0];
+  }
 }
 
 /* ENDFILE: includes/WpBooj.php */
