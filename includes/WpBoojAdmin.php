@@ -364,7 +364,7 @@ class WpBoojAdmin
     $options = get_option( 'wp-booj' );
     if( $options['disable_plugin_management'] == 'on' ){
       $user = wp_get_current_user();
-      if( $user->data->user_login != 'booj' ){
+      if( $user->data->user_login != 'booj' ||  $user->data->user_login != 'admin' ){
         ?>
         <style type="text/css">
           #menu-links { display: none; }
