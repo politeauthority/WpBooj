@@ -134,7 +134,7 @@ class WpBoojRelated {
 			$rows = $wpdb->get_results( $query3 );
 
 			foreach( $rows as $key => $row ) {
-				$potential_posts[$row->ID]['ID']   = $row->ID;
+				$potential_posts[$row->ID]['post_id']   = $row->ID;
 				$potential_posts[$row->ID]['post'] = $row;
 			}
 		}
