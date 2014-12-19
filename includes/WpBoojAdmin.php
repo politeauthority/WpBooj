@@ -29,6 +29,9 @@ class WpBoojAdmin
     add_action( 'show_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
     add_action( 'edit_user_profile',        array( $this, 'booj_profile_fields_admin_display' ) );
 
+    add_action( 'personal_options_udpate', array( $this, 'booj_profile_fields_admin_save' ) );
+    add_action( 'edit_user_profile_update', array( $this, 'booj_profile_fields_admin_save' ) );
+
     add_action( 'admin_init', array( $this, 'remove_nag' )             );
     add_action( 'admin_head', array( $this, 'remove_nag_css' )         );
 
@@ -264,7 +267,7 @@ class WpBoojAdmin
     <? 
   }
 
-  public function booj_profile_fields_save( $user_id ) {
+  public function booj_profile_fields_admin_save( $user_id ) {
     if ( !current_user_can( 'edit_user', $user_id ) )
       return false;
     update_usermeta( $user_id, 'agent_bio_url', $_POST['agent_bio_url'] );
