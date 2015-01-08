@@ -2,8 +2,8 @@
 /*
 Plugin Name: WpBooj
 Plugin URI: https://github.com/politeauthority/WpBooj/
-Description: Booj general plugin. Fixes Admin URLs and many other simple tweaks
-Version: 1.61
+Description: Booj plugin. Extendeds Wordpress in many wonderful ways!
+Version: 1.7
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
 Release Date: 2014-12-2
@@ -13,10 +13,11 @@ This version currently supports;
 - Facebook status integration.
 - Random post button
 - Related posts
-- Cahce anywhere caching
+- Cache anywhere caching
 - Proxy url resolution from Apache proxies
 - Rebrandable support, allowing multi-domain resolution
 - Query debugger.
+- Pending Post Emailer
 
 Developer Notes
 - Supports variable table prefixes

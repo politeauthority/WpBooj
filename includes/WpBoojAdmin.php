@@ -34,7 +34,10 @@ class WpBoojAdmin
 
     add_action( 'admin_init', array( $this, 'remove_nag' )             );
     add_action( 'admin_head', array( $this, 'remove_nag_css' )         );
-
+    
+    add_action( 'draft_to_pending',      array( $this, 'email_draft_submission_to_admins'), 10, 1 );
+    add_action( 'new_to_pending',        array( $this, 'email_draft_submission_to_admins' ) );
+    add_action( 'auto-draft_to_pending', array( $this, 'email_draft_submission_to_admins' ) );
   }
 
   public function booj_branding(){
@@ -160,10 +163,25 @@ class WpBoojAdmin
       'use_WpBoojDebug',
       'Enable Debugger',
       array( $this, 'use_WpBoojDebug_callback' ),
-		  'wp-booj-admin',
+      'wp-booj-admin',
       'setting_section_id'
-		);
+    );
 
+    add_settings_field(
+      'use_WpBoojDraftMailer', 
+      'Enable WpBooj Draft Emailer', 
+      array( $this, 'use_WpBoojDraftMailer_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    );
+    
+    add_settings_field(
+      'WpBoojDraftMailerEmails', 
+      'Email addresses to notify when a non admin saves a draft', 
+      array( $this, 'WpBoojDraftMailerEmails_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    );
   }
 
   /**
@@ -190,6 +208,12 @@ class WpBoojAdmin
     
     if( isset( $input['use_WpBoojDebug'] ) )
       $new_input['use_WpBoojDebug'] = $input['use_WpBoojDebug'];
+
+    if( isset( $input['use_WpBoojDraftMailer'] ) )
+      $new_input['use_WpBoojDraftMailer'] = $input['use_WpBoojDraftMailer'];
+
+    if( isset( $input['WpBoojDraftMailerEmails'] ) )
+      $new_input['WpBoojDraftMailerEmails'] = $input['WpBoojDraftMailerEmails'];
 
     return $new_input;
   }
@@ -238,7 +262,19 @@ class WpBoojAdmin
     ?>
     <input type="checkbox" name="wp-booj[use_WpBoojDebug]" <? if( $this->options['use_WpBoojDebug'] == 'on' ){ echo 'checked="checked"'; } ?> />        
     <?
-  }    
+  }
+
+  public function use_WpBoojDraftMailer_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[use_WpBoojDraftMailer]" <? if( $this->options['use_WpBoojDraftMailer'] == 'on' ){ echo 'checked="checked"'; } ?> />
+    <?
+  }
+
+  public function WpBoojDraftMailerEmails_callback(){
+    ?>
+    <input type="text" name="wp-booj[WpBoojDraftMailerEmails]" value="<? echo $this->options['WpBoojDraftMailerEmails']; ?>" />
+    <?
+  }
 
   /***********************************************************
      _____     _   _              _____     _       
@@ -377,6 +413,34 @@ class WpBoojAdmin
         </style>
         <?
       }
+    }
+  }
+
+  public function email_draft_submission_to_admins( $post_id ){
+    $options = get_option( 'wp-booj' );
+    $post = get_post( $post_id );
+    if( $options['use_WpBoojDraftMailer'] == 'on' && $options['WpBoojDraftMailerEmails'] != '' ){
+      if( strpos( $options['WpBoojDraftMailerEmails'], ',' ) !== false) {
+        $emails = explode( ',', $options['WpBoojDraftMailerEmails'] );
+      } else {
+        $emails = $options['WpBoojDraftMailerEmails'];
+      }
+
+      $post = get_post( $post_id );
+      $post_title = get_the_title( $post_id );
+      $post_url = get_permalink( $post_id );
+
+      $preview_url = site_url() . '/?p=' . $post->ID . '&preview=true';
+      $admin_url   = site_url() . '/wp-admin/post.php?post=' . $post->ID . '&action=edit';
+
+      $subject = 'Blog Draft Has Been Submitted - ' . WpBooj::truncate_by_word( $post_title, 50 );
+      $message  = "New post Pending review:\n\n";
+      $message .= $post_title . "\n";
+      $message .= 'By '. get_the_author_meta( 'display_name', $post->post_author ) . "\n";
+      $message .= 'Preview Url: '. $preview_url ."\n";
+      $message .= 'Admin Url:   '. $admin_url ."\n";
+      // Send email to admin.
+      wp_mail( $emails, $subject, $message );
     }
   }
 
