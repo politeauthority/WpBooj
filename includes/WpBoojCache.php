@@ -12,6 +12,10 @@
 
 class WpBoojCache {
 
+  function __construct(){
+		add_action( 'save_post',    array( $this, 'clear_cache_post_save' ) );
+  }
+
 	/***
 		Check
 		@desc   : Retrieves a cache if it exists, otherwise returns False
@@ -74,22 +78,24 @@ class WpBoojCache {
 		$wpdb->query( $sql );
 	}
 
-	//@todo: this needs to get called whenever a post is updated, probably a button in the admin too
 	public static function clear_cache( $post_id = None, $type_id = None ){
 		global $wpdb;
 		if( $post_id == None && $type_id == None ) { 		// remove all caches
 			$sql = "TRUNCATE table {$wpdb->prefix}WpBoojCache;";
 		} elseif( $post_id != None && $type_id == None ){
 			$sql = "DELETE FROM {$wpdb->prefix}WpBoojCache WHERE
-				`post_id` = '{$post_id}' AND
-				`type` = {$type};";
+				`post_id` = '{$post_id}';";
 		} elseif( $post_id == None && $type_id != None ){
 			$sql = "DELETE FROM {$wpdb->prefix}WpBoojCache WHERE
 				`type` = '{$type_id}'; ";
 		} else {
 			$sql = '';
 		}
-		die( $sql );
+		$wpdb->get_results( $sql );
+	}
+	
+	public static function clear_cache_post_save( $post_id ){
+		WpBoojCache::clear_cache( $post_id = $post_id );
 	}
 
 }
