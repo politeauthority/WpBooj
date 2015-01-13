@@ -48,16 +48,16 @@ class WpBoojCache {
 		@todo   : Use INSERT ON DUPLICATE KEY UPDATE once table structure is correct for this support
 		@params
 			$post_id   : int( ) use 0 or null for non post related caches.
-			$post_type : string( ) 
+			$cache_type : string( ) 
 			$data      : array( ) info to be stored
 	*/
-	public static function store( $post_id, $post_type, $data ){
+	public static function store( $post_id, $cache_type, $data ){
 		$data = mysql_real_escape_string( serialize( $data ) ); 
 		global $wpdb;
 		// check if an old cache exists to overwrite
 		$sql = "SELECT * FROM {$wpdb->prefix}WpBoojCache WHERE 
 			`post_id` = '' AND 
-			`post_type` = '$post_type' 
+			`cache_type` = '$cache_type' 
 			ORDER BY `last_update_ts` 
 			DESC LIMIT 1;";
 		$response = $wpdb->get_results( $sql );
@@ -65,11 +65,11 @@ class WpBoojCache {
 			$sql = "UPDATE {$wpdb->prefix}WpBoojCache SET 
 				`data` = '{$data}'
 				WHERE `post_id` = '$post_id' AND
-				`post_type` = '$post_type';";
+				`cache_type` = '$cache_type';";
 		} else {
 			$sql  = "INSERT INTO {$wpdb->prefix}WpBoojCache
 				( `type`,`post_id`,`data` ) 
-				VALUES( '$post_type', '$post_id', '$data' );";
+				VALUES( '$cache_type', '$post_id', '$data' );";
 		}
 		$wpdb->query( $sql );
 	}
