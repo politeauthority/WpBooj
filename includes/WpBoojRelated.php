@@ -25,7 +25,7 @@
 class WpBoojRelated {
 	
 	public static function get( $post_id, $count = 4 ){
-		$related_cache = WpBoojCache::check( $post_id = $post_id, $type = 'WpBoojRelated' );
+		$related_cache = WpBoojCache::check( $post_id = $post_id, $type = 'WpBoojRelated' );		
 		if( $related_cache ){
 			return $related_cache;
 		}
@@ -60,9 +60,17 @@ class WpBoojRelated {
 			$full_search = $tag_ids . "," . $cat_ids;
 		}
 
+		// Get the term_taxonomy_id from the term_ids
+		$query = "SELECT * FROM `{$wpdb->prefix}term_taxonomy` WHERE `term_id` IN ( ". $full_search  ." );";
+		$rows  = $wpdb->get_results( $query );
+		$term_taxonomy_ids = '';
+		foreach( $rows as $key => $row ){
+			$term_taxonomy_ids .= $row->term_taxonomy_id . ',';		  
+		}
+		$term_taxonomy_ids = substr( $term_taxonomy_ids, 0, -1);		
 		$query = "SELECT DISTINCT( object_id ), COUNT(*) AS count 
 			FROM `{$wpdb->prefix}term_relationships` 
-			WHERE `term_taxonomy_id` IN( " . $full_search ." ) 
+			WHERE `term_taxonomy_id` IN( " . $term_taxonomy_ids ." ) 
 				AND `object_id` != " . $post_id . "
 			GROUP BY 1
 			ORDER BY 2 DESC
@@ -80,7 +88,6 @@ class WpBoojRelated {
 			$post_ids .= $row->object_id . ',';
 		}
 		$post_ids = substr( $post_ids, 0, -1);
-
 		// NOW WE QUERY AGAINST THE POST IDS FROM ABOVE
 		// WE ARE FILTERING OUT ANY POST WHICH IS NOT PUBLISHED
 		// $potential_posts is important here
