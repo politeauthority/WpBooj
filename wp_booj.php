@@ -8,6 +8,7 @@ Author: Alix Fullerton
 Author URI: http://www.booj.com/
 Release Date: 2014-2-4
 
+
 This version currently supports; 
 - Adds author meta options in admin
 - Facebook status / twitter feed integration.
@@ -56,7 +57,7 @@ function WpBooj_activate(){
   $WpBoojCache_table_sql = "CREATE TABLE {$wpdb->prefix}WpBoojCache (
     `cache_id` int(11) NOT NULL AUTO_INCREMENT,
     `post_id` int(11) DEFAULT NULL,
-    `type` varchar(255) DEFAULT NULL,
+    `cache_type` varchar(255) DEFAULT NULL,
     `data` longtext DEFAULT NULL,
     `last_update_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
      PRIMARY KEY (`cache_id`)
@@ -65,7 +66,11 @@ function WpBooj_activate(){
   dbDelta( $WpBoojCache_table_sql );  
 }
 
-function WpBooj_deactivate(){ }
+function WpBooj_deactivate(){ 
+  global $wpdb;
+  $WpBoojCache_table_sql = "DROP TABLE {$wpdb->prefix}WpBoojCache;";
+  $wpdb->get_results( $WpBoojCache_table_sql );
+}
 
 if (! function_exists( 'wp_redirect' ) && $WpBooj_options['proxy_admin_urls'] == 'on' ) {
   function wp_redirect($location, $status = 302) {

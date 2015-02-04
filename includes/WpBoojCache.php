@@ -12,6 +12,10 @@
 
 class WpBoojCache {
 
+  function __construct(){
+		add_action( 'save_post',    array( $this, 'clear_cache_post_save' ) );
+  }
+
 	/***
 		Check
 		@desc   : Retrieves a cache if it exists, otherwise returns False
@@ -48,16 +52,16 @@ class WpBoojCache {
 		@todo   : Use INSERT ON DUPLICATE KEY UPDATE once table structure is correct for this support
 		@params
 			$post_id   : int( ) use 0 or null for non post related caches.
-			$post_type : string( ) 
+			$cache_type : string( ) 
 			$data      : array( ) info to be stored
 	*/
-	public static function store( $post_id, $post_type, $data ){
+	public static function store( $post_id, $cache_type, $data ){
 		$data = mysql_real_escape_string( serialize( $data ) ); 
 		global $wpdb;
 		// check if an old cache exists to overwrite
 		$sql = "SELECT * FROM {$wpdb->prefix}WpBoojCache WHERE 
 			`post_id` = '' AND 
-			`post_type` = '$post_type' 
+			`cache_type` = '$cache_type' 
 			ORDER BY `last_update_ts` 
 			DESC LIMIT 1;";
 		$response = $wpdb->get_results( $sql );
@@ -65,31 +69,33 @@ class WpBoojCache {
 			$sql = "UPDATE {$wpdb->prefix}WpBoojCache SET 
 				`data` = '{$data}'
 				WHERE `post_id` = '$post_id' AND
-				`post_type` = '$post_type';";
+				`cache_type` = '$cache_type';";
 		} else {
 			$sql  = "INSERT INTO {$wpdb->prefix}WpBoojCache
 				( `type`,`post_id`,`data` ) 
-				VALUES( '$post_type', '$post_id', '$data' );";
+				VALUES( '$cache_type', '$post_id', '$data' );";
 		}
 		$wpdb->query( $sql );
 	}
 
-	//@todo: this needs to get called whenever a post is updated, probably a button in the admin too
 	public static function clear_cache( $post_id = None, $type_id = None ){
 		global $wpdb;
 		if( $post_id == None && $type_id == None ) { 		// remove all caches
 			$sql = "TRUNCATE table {$wpdb->prefix}WpBoojCache;";
 		} elseif( $post_id != None && $type_id == None ){
 			$sql = "DELETE FROM {$wpdb->prefix}WpBoojCache WHERE
-				`post_id` = '{$post_id}' AND
-				`type` = {$type};";
+				`post_id` = '{$post_id}';";
 		} elseif( $post_id == None && $type_id != None ){
 			$sql = "DELETE FROM {$wpdb->prefix}WpBoojCache WHERE
 				`type` = '{$type_id}'; ";
 		} else {
 			$sql = '';
 		}
-		die( $sql );
+		$wpdb->get_results( $sql );
+	}
+	
+	public static function clear_cache_post_save( $post_id ){
+		WpBoojCache::clear_cache( $post_id = $post_id );
 	}
 
 }
