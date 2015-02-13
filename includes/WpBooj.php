@@ -13,6 +13,9 @@
 class WpBooj {
   
   function __construct(){
+    // Permissions
+    add_filter( 'user_has_cap', array( $this, 'capability_filter'), 10, 3 );
+    
     // Actions for front end url fixes
     add_action( 'wp_head',    array( $this, 'redirect_activeclients' ) );
     add_action( 'wp_head',    array( $this, 'relative_urls' ) );
@@ -26,6 +29,19 @@ class WpBooj {
     add_action( 'rss2_item', array( $this, 'feed_featured_image_enclosure' ) );
     add_action( 'rss2_item', array( $this, 'feed_realtor_image_enclosure' ) );
   }
+
+  /**********
+    Permissions
+    Custom permissions sets for Booj users
+   */
+
+  public function capability_filter( $allcaps, $cap, $args ){
+    $Admin = get_role('Admin');
+    $Contributor = get_role('contributor');
+    $Contributor->add_cap( 'upload_files');
+    return $allcaps;
+  }
+
 
   /***********************************************************
      _____  
