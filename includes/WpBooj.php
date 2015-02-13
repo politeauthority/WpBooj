@@ -36,7 +36,7 @@ class WpBooj {
    */
 
   public function capability_filter( $allcaps, $cap, $args ){
-    $Admin = get_role('Admin');
+    $Admin = get_role('admin');
     $Contributor = get_role('contributor');
     $Contributor->add_cap( 'upload_files');
     return $allcaps;
