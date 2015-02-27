@@ -72,7 +72,7 @@ class WpBoojCache {
 				`cache_type` = '$cache_type';";
 		} else {
 			$sql  = "INSERT INTO {$wpdb->prefix}WpBoojCache
-				( `type`,`post_id`,`data` ) 
+				( `cache_type`,`post_id`,`data` ) 
 				VALUES( '$cache_type', '$post_id', '$data' );";
 		}
 		$wpdb->query( $sql );
