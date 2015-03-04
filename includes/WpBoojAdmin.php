@@ -182,6 +182,15 @@ class WpBoojAdmin
       'wp-booj-admin', 
       'setting_section_id'
     );
+
+    add_settings_field(
+      'WpBoojEnableUATracking', 
+      'Enable Google Tracking', 
+      array( $this, 'WpBoojEnableUATracking_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    );
+
   }
 
   /**
@@ -214,6 +223,9 @@ class WpBoojAdmin
 
     if( isset( $input['WpBoojDraftMailerEmails'] ) )
       $new_input['WpBoojDraftMailerEmails'] = $input['WpBoojDraftMailerEmails'];
+
+    if( isset( $input['WpBoojEnableUATracking'] ) )
+      $new_input['WpBoojEnableUATracking'] = $input['WpBoojEnableUATracking'];
 
     return $new_input;
   }
@@ -273,6 +285,12 @@ class WpBoojAdmin
   public function WpBoojDraftMailerEmails_callback(){
     ?>
     <input type="text" name="wp-booj[WpBoojDraftMailerEmails]" value="<? echo $this->options['WpBoojDraftMailerEmails']; ?>" />
+    <?
+  }
+
+  public function WpBoojEnableUATracking_callback(){
+    ?>
+    <input type="checkbox" name="wp-booj[WpBoojEnableUATracking]" <? if( $this->options['WpBoojEnableUATracking'] == 'on' ){ echo 'checked="checked"'; } ?> />    
     <?
   }
 
