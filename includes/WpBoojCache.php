@@ -91,7 +91,7 @@ class WpBoojCache {
 		} else {
 			$sql = '';
 		}
-		$wpdb->get_results( $sql );
+		$wpdb->query( $sql );
 		$sql = "SELECT count(*) as c FROM {$wpdb->prefix}WpBoojCache;";
 		$results = $wpdb->get_results( $sql );
 		if ( $results[0]->c > 100000){

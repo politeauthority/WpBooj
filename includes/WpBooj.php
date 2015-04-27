@@ -565,6 +565,22 @@ class WpBooj {
     $posts = get_posts( $args );
     return $posts[0];
   }
+
+  public static function display_author_info( $post_id, $default = True ){
+    $postive_words = array( 'yes', 'true', 'yeah', 'yea', 'yep', 'show');
+    $negative_words = array( 'no', 'false', 'nope', 'hide');
+    $post_meta = get_post_meta( $post_id );
+    if(array_key_exists( 'display_author', $post_meta )){
+      $display_author = $post_meta['display_author'][0];
+      if(in_array(strtolower($display_author),$postive_words)){
+        die('they want to show it');
+        return True;
+      } elseif(in_array(strtolower($display_author),$negative_words)){
+        return False;
+      }
+    }
+    return $default;
+  }
 }
 
 /* ENDFILE: includes/WpBooj.php */
