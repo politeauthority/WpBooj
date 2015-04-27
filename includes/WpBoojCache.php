@@ -92,6 +92,12 @@ class WpBoojCache {
 			$sql = '';
 		}
 		$wpdb->get_results( $sql );
+		$sql = "SELECT count(*) as c FROM {$wpdb->prefix}WpBoojCache;";
+		$results = $wpdb->get_results( $sql );
+		if ( $results[0]->c > 100000){
+			$sql = "TRUNCATE table {$wpdb->prefix}WpBoojCache;";
+			$wpdb->query( $sql );
+		}
 	}
 	
 	public static function clear_cache_post_save( $post_id ){
