@@ -573,7 +573,6 @@ class WpBooj {
     if(array_key_exists( 'display_author', $post_meta )){
       $display_author = $post_meta['display_author'][0];
       if(in_array(strtolower($display_author),$postive_words)){
-        die('they want to show it');
         return True;
       } elseif(in_array(strtolower($display_author),$negative_words)){
         return False;
