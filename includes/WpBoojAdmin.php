@@ -10,8 +10,7 @@
 
 */
 
-class WpBoojAdmin
-{
+class WpBoojAdmin {
   /**
    * Holds the values to be used in the fields callbacks
    */
@@ -48,12 +47,12 @@ class WpBoojAdmin
           display: none;
         }
         #wpfooter{
-          background-image: url('<? print get_site_url(); ?>/wp-content/plugins/WpBooj/logo-enterprise-network.gif');
+          background-image: url('<?php print get_site_url(); ?>/wp-content/plugins/WpBooj/logo-enterprise-network.gif');
           background-repeat: no-repeat;
           background-position: right;
         }
       </style>
-      <?
+      <?php
     }
   }
 
@@ -105,7 +104,7 @@ class WpBoojAdmin
   /**
    * Register and add settings
    */
-  public function page_init(){        
+  function page_init(){        
     register_setting(
       'wp-booj', // Option group
       'wp-booj', // Option name
@@ -198,7 +197,7 @@ class WpBoojAdmin
    *
    * @param array $input Contains all settings fields as array keys
    */
-  public function sanitize( $input ){
+  function sanitize( $input ){
     $new_input = array();
     if( isset( $input['proxy_admin_urls'] ) )
       $new_input['proxy_admin_urls'] = $input['proxy_admin_urls'] ;
@@ -233,65 +232,65 @@ class WpBoojAdmin
   /** 
    * Print the Section text
    */
-  public function print_section_info(){
+  function print_section_info(){
     print "If you don't understand these options, you will want to leave them as they are!";
   }
 
   /** 
    * Get the settings option array and print one of its values
    */
-  public function proxy_admin_urls_callback(){
+  function proxy_admin_urls_callback(){
     ?>
-    <input type="checkbox" name="wp-booj[proxy_admin_urls]" <? if( $this->options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> />        
-    <?
+    <input type="checkbox" name="wp-booj[proxy_admin_urls]" <?php if( $this->options['proxy_admin_urls'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?php
   }
 
-  public function related_posts_callback(){
+  function related_posts_callback(){
     ?>
-    <input type="checkbox" name="wp-booj[related_posts]" <? if( $this->options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> />        
-    <?
+    <input type="checkbox" name="wp-booj[related_posts]" <?php if( $this->options['related_posts'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?php
   }
 
-  public function relative_urls_callback(){
+  function relative_urls_callback(){
     ?>
-    <input type="checkbox" name="wp-booj[relative_urls]" <? if( $this->options['relative_urls'] == 'on' ){ echo 'checked="checked"'; } ?> />        
-    <?
+    <input type="checkbox" name="wp-booj[relative_urls]" <?php if( $this->options['relative_urls'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?php
   }
 
-  public function disable_plugin_management_callback(){
+  function disable_plugin_management_callback(){
     ?>
-    <input type="checkbox" name="wp-booj[disable_plugin_management]" <? if( $this->options['disable_plugin_management'] == 'on' ){ echo 'checked="checked"'; } ?> />        
-    <?
+    <input type="checkbox" name="wp-booj[disable_plugin_management]" <?php if( $this->options['disable_plugin_management'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?php
   }
 
-  public function use_WpBoojCache_callback(){
+  function use_WpBoojCache_callback(){
     ?>
-    <input type="checkbox" name="wp-booj[use_WpBoojCache]" <? if( $this->options['use_WpBoojCache'] == 'on' ){ echo 'checked="checked"'; } ?> />        
-    <?
+    <input type="checkbox" name="wp-booj[use_WpBoojCache]" <?php if( $this->options['use_WpBoojCache'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?php
   }
 
-  public function use_WpBoojDebug_callback(){
+  function use_WpBoojDebug_callback(){
     ?>
-    <input type="checkbox" name="wp-booj[use_WpBoojDebug]" <? if( $this->options['use_WpBoojDebug'] == 'on' ){ echo 'checked="checked"'; } ?> />        
-    <?
+    <input type="checkbox" name="wp-booj[use_WpBoojDebug]" <?php if( $this->options['use_WpBoojDebug'] == 'on' ){ echo 'checked="checked"'; } ?> />        
+    <?php
   }
 
-  public function use_WpBoojDraftMailer_callback(){
+  function use_WpBoojDraftMailer_callback(){
     ?>
-    <input type="checkbox" name="wp-booj[use_WpBoojDraftMailer]" <? if( $this->options['use_WpBoojDraftMailer'] == 'on' ){ echo 'checked="checked"'; } ?> />
-    <?
+    <input type="checkbox" name="wp-booj[use_WpBoojDraftMailer]" <?php if( $this->options['use_WpBoojDraftMailer'] == 'on' ){ echo 'checked="checked"'; } ?> />
+    <?php
   }
 
-  public function WpBoojDraftMailerEmails_callback(){
+  function WpBoojDraftMailerEmails_callback(){
     ?>
-    <input type="text" name="wp-booj[WpBoojDraftMailerEmails]" value="<? echo $this->options['WpBoojDraftMailerEmails']; ?>" />
-    <?
+    <input type="text" name="wp-booj[WpBoojDraftMailerEmails]" value="<?php echo $this->options['WpBoojDraftMailerEmails']; ?>" />
+    <?php
   }
 
-  public function WpBoojEnableUATracking_callback(){
+  function WpBoojEnableUATracking_callback(){
     ?>
-    <input type="checkbox" name="wp-booj[WpBoojEnableUATracking]" <? if( $this->options['WpBoojEnableUATracking'] == 'on' ){ echo 'checked="checked"'; } ?> />    
-    <?
+    <input type="checkbox" name="wp-booj[WpBoojEnableUATracking]" <?php if( $this->options['WpBoojEnableUATracking'] == 'on' ){ echo 'checked="checked"'; } ?> />    
+    <?php
   }
 
   /***********************************************************
@@ -318,10 +317,10 @@ class WpBoojAdmin
         </td>
       </tr>
     </table>
-    <? 
+    <?php 
   }
 
-  public function booj_profile_fields_admin_save( $user_id ) {
+  function booj_profile_fields_admin_save( $user_id ) {
     if ( !current_user_can( 'edit_user', $user_id ) )
       return false;
     update_usermeta( $user_id, 'agent_bio_url', $_POST['agent_bio_url'] );
@@ -341,7 +340,7 @@ class WpBoojAdmin
 
   */
 
-  public function proxy_admin_urls(){
+  function proxy_admin_urls(){
     // Update the HTTP_HOST because wordpress bases urls off of this
     // We're removing 7 characters, 'http://' so the site_url MUST BE ex: http://www.clarkhawaii.com/
     // @todo: Make this more robust for the above reason!
@@ -366,7 +365,7 @@ class WpBoojAdmin
       // we catch all urls that start with "/" and put /blog/ ahead
       ?>
       <script type="text/javascript">
-        uri_segment = '<? echo WpBoojFindURISegment(); ?>';
+        uri_segment = '<?php echo WpBoojFindURISegment(); ?>';
         uri_len     = uri_segment.length + 1;
         jQuery(document).ready( function() {
           jQuery('a').each( function(){
@@ -383,7 +382,7 @@ class WpBoojAdmin
           });
         });
       </script>
-      <?
+      <?php
     }
   }
 
@@ -402,11 +401,11 @@ class WpBoojAdmin
 
   */
 
-  public function remove_nag() {
+  function remove_nag() {
     remove_action('admin_notices', 'update_nag', 3);
   }
 
-  public function remove_nag_css(){
+  function remove_nag_css(){
     ?>
     <style type="text/css">
       /* heres the css */
@@ -414,10 +413,10 @@ class WpBoojAdmin
       #menu-dashboard ul li a .update-count{ display: none; }
       .plugin-count{ display: none !important; }
     </style>
-    <?
+    <?php
   }
 
-  public function plugin_management(){
+  function plugin_management(){
     $options = get_option( 'wp-booj' );
     if( $options['disable_plugin_management'] == 'on' ){
       $user = wp_get_current_user();
@@ -429,12 +428,12 @@ class WpBoojAdmin
           #menu-plugins { display: none; }
           #toplevel_page_itsec { display: none; }
         </style>
-        <?
+        <?php
       }
     }
   }
 
-  public function email_draft_submission_to_admins( $post_id ){
+  function email_draft_submission_to_admins( $post_id ){
     $options = get_option( 'wp-booj' );
     $post = get_post( $post_id );
     if( $options['use_WpBoojDraftMailer'] == 'on' && $options['WpBoojDraftMailerEmails'] != '' ){
@@ -463,3 +462,5 @@ class WpBoojAdmin
   }
 
 }
+
+?>
