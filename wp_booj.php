@@ -3,13 +3,14 @@
 Plugin Name: WpBooj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj plugin. Extendeds Wordpress in many wonderful ways!
-Version: 1.7.9
+Version: 1.8.0
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
 Release Date: 2014-3-4
 
 
 This version currently supports; 
+- PHP 5.5 support
 - Adds author meta options in admin
 - Facebook status / twitter feed integration.
 - Random post button
