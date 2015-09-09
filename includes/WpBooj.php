@@ -28,6 +28,7 @@ class WpBooj {
     // Actions for feed modifications
     add_action( 'rss2_item', array( $this, 'feed_featured_image_enclosure' ) );
     add_action( 'rss2_item', array( $this, 'feed_realtor_image_enclosure' ) );
+    add_action( 'rss2_item', array( $this, 'feed_post_id_append' ) );    
   }
 
   /**********
@@ -350,6 +351,10 @@ class WpBooj {
         );
       }
     }
+  }
+
+  function feed_post_id_append() {
+    printf( '<post_id>%s</post_id>', get_the_ID() );
   }
 
   /************************************************************                             
