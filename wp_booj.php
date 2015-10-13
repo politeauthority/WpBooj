@@ -3,10 +3,10 @@
 Plugin Name: WpBooj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj plugin. Extendeds Wordpress in many wonderful ways!
-Version: 1.8.0
+Version: 1.9.0
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
-Release Date: 2014-3-4
+Release Date: 2015-10-13
 
 
 This version currently supports; 
@@ -20,6 +20,7 @@ This version currently supports;
 - Rebrandable support, allowing multi-domain resolution
 - Query debugger.
 - Pending Post Emailer
+- Google Analytics Management
 
 Developer Notes
 - Supports variable table prefixes
@@ -64,12 +65,18 @@ function WpBooj_activate(){
      PRIMARY KEY (`cache_id`)
      ) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
   require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-  dbDelta( $WpBoojCache_table_sql );  
+  dbDelta( $WpBoojCache_table_sql );
+  wp_schedule_event(time(), 'daily', 'WpBooj_daily');
 }
 
 function WpBooj_deactivate(){ 
   global $wpdb;
   $WpBoojCache_table_sql = "DROP TABLE {$wpdb->prefix}WpBoojCache;";
+  $wpdb->get_results( $WpBoojCache_table_sql );
+}
+
+function WpBooj_daily(){
+  $WpBoojCache_table_sql = "TRUNCATE TABLE {$wpdb->prefix}WpBoojCache;";
   $wpdb->get_results( $WpBoojCache_table_sql );
 }
 

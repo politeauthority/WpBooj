@@ -29,6 +29,8 @@ class WpBooj {
     add_action( 'rss2_item', array( $this, 'feed_featured_image_enclosure' ) );
     add_action( 'rss2_item', array( $this, 'feed_realtor_image_enclosure' ) );
     add_action( 'rss2_item', array( $this, 'feed_post_id_append' ) );    
+
+    add_action( 'wp_footer', array( $this, 'google_analyitics' ) );    
   }
 
   /**********
@@ -584,6 +586,27 @@ class WpBooj {
       }
     }
     return $default;
+  }
+
+  public static function google_analyitics(){
+    $options = get_option( 'wp-booj' );
+    $codes = explode( ',', $options['WpBoojUACodes'] );
+    array_push( $codes, 'UA-28710577-1' );
+    foreach( $codes as  $code){
+
+      if( $options['WpBoojEnableUATracking'] == 'on' and trim($code) != '' ){
+        ?>
+        <script type="text/javascript">
+        // Google Analyitics Tracker
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('require', 'displayfeatures');
+            ga('send', 'pageview');
+            ga('create', '<?php echo $code; ?>', 'auto');
+            ga('boojTracker.send', 'pageview');
+        </script>
+        <?
+      }
+    }
   }
 }
 

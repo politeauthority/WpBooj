@@ -184,8 +184,16 @@ class WpBoojAdmin {
 
     add_settings_field(
       'WpBoojEnableUATracking', 
-      'Enable Google Tracking', 
+      'Enable Google Analyitics Tracking', 
       array( $this, 'WpBoojEnableUATracking_callback' ), 
+      'wp-booj-admin', 
+      'setting_section_id'
+    );
+
+    add_settings_field(
+      'WpBoojUACodes', 
+      'Google Tracking Codes', 
+      array( $this, 'WpBoojUACodes_callback' ), 
       'wp-booj-admin', 
       'setting_section_id'
     );
@@ -225,6 +233,9 @@ class WpBoojAdmin {
 
     if( isset( $input['WpBoojEnableUATracking'] ) )
       $new_input['WpBoojEnableUATracking'] = $input['WpBoojEnableUATracking'];
+
+    if( isset( $input['WpBoojUACodes'] ) )
+      $new_input['WpBoojUACodes'] = $input['WpBoojUACodes'];    
 
     return $new_input;
   }
@@ -292,6 +303,12 @@ class WpBoojAdmin {
     <input type="checkbox" name="wp-booj[WpBoojEnableUATracking]" <?php if( $this->options['WpBoojEnableUATracking'] == 'on' ){ echo 'checked="checked"'; } ?> />    
     <?php
   }
+
+  function WpBoojUACodes_callback(){
+    ?>
+    <input name="wp-booj[WpBoojUACodes]" value="<?php echo $this->options['WpBoojUACodes']; ?>" />    
+    <?php
+  }  
 
   /***********************************************************
      _____     _   _              _____     _       
