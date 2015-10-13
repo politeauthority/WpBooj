@@ -591,21 +591,29 @@ class WpBooj {
   public static function google_analyitics(){
     $options = get_option( 'wp-booj' );
     $codes = explode( ',', $options['WpBoojUACodes'] );
-    array_push( $codes, 'UA-28710577-1' );
-    foreach( $codes as  $code){
-
-      if( $options['WpBoojEnableUATracking'] == 'on' and trim($code) != '' ){
+    if( $options['WpBoojEnableUATracking'] == 'on' ){
+      ?>
+      <script type="text/javascript">
+      // Universal Google Analyitics Tracker
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+          ga('require', 'displayfeatures');
+          ga('send', 'pageview');
+          ga('create', 'UA-28710577-1', 'auto');
+          ga('boojTracker.send', 'pageview');
+      </script>
+      <?
+      foreach( $codes as  $code){
         ?>
         <script type="text/javascript">
-        // Google Analyitics Tracker
+        // Client Google Analyitics Tracker
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
             ga('require', 'displayfeatures');
             ga('send', 'pageview');
-            ga('create', '<?php echo $code; ?>', 'auto');
+            ga('create', '<?php echo trim( $code ); ?>', 'auto');
             ga('boojTracker.send', 'pageview');
         </script>
         <?
-      }
+      }        
     }
   }
 }
