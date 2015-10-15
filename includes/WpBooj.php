@@ -594,28 +594,25 @@ class WpBooj {
     if( $options['WpBoojEnableUATracking'] == 'on' ){
       ?>
       <script type="text/javascript">
-      // Universal Google Analyitics Tracker
+      // WpBooj 1.9 Google Ananlytics Tracking 
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-          ga('require', 'displayfeatures');
-          ga('send', 'pageview');
-          ga('create', 'UA-28710577-1', 'auto');
-      </script>
-      <?
-      $c = 1;
-      foreach( $codes as  $code){
-        $tracker_name = 'clientTracking' . $c;
-        $c++;
+        ga('require', 'displayfeatures');
+        ga('create', 'UA-28710577-1', 'auto'); // booj Tracker
+        ga('send', 'pageview');
+        <?php 
+          $c = 1;
+          foreach( $codes as $code ){
+            $tracker_name = 'clientTracking' . $c;
+            $c++;
+            ?> 
+            //<?php echo $tracker_name; ?>
+            ga('create', '<?php echo trim( $code ); ?>', 'auto', '<?php echo $tracker_name;?>' );
+            ga('<?php echo $tracker_name; ?>.send', 'pageview');
+            <?php
+          }
         ?>
-        <script type="text/javascript">
-        // Client<?php echo $tracker_name; ?> Google Analyitics Tracker
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-            ga('require', 'displayfeatures');
-            ga('send', 'pageview');
-            ga('create', '<?php echo trim( $code ); ?>', 'auto');
-            ga('<?php echo $tracker_name;?>.send', 'pageview');
-        </script>
-        <?
-      }        
+      </script>
+      <?      
     }
   }
 }
