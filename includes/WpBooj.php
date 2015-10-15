@@ -602,7 +602,10 @@ class WpBooj {
           ga('boojTracker.send', 'pageview');
       </script>
       <?
+      $c = 1;
       foreach( $codes as  $code){
+        $tracker_name = 'clientTracking' . $c;
+        $c++;
         ?>
         <script type="text/javascript">
         // Client Google Analyitics Tracker
@@ -610,7 +613,7 @@ class WpBooj {
             ga('require', 'displayfeatures');
             ga('send', 'pageview');
             ga('create', '<?php echo trim( $code ); ?>', 'auto');
-            ga('boojTracker.send', 'pageview');
+            ga('<?php echo $tracker_name;?>.send', 'pageview');
         </script>
         <?
       }        
