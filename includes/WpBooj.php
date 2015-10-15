@@ -606,6 +606,7 @@ class WpBooj {
             $c++;
             ?> 
             //<?php echo $tracker_name; ?>
+            
             ga('create', '<?php echo trim( $code ); ?>', 'auto', {'name': '<?php echo $tracker_name;?>'} );
             ga('<?php echo $tracker_name; ?>.send', 'pageview');
             <?php
