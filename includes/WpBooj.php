@@ -641,18 +641,13 @@ function rss_most_popular(){
     ORDER BY pm.meta_value  DESC, p.post_date DESC
     limit 10;";
   $popular = $wpdb->get_results( $sql  );
-
-  print $sql;
-  print_r( $popular );
-
-  $posts = array();
-  foreach( $p as $popular){
-    $p = get_post( $p );
-    $p[] = $p;
+  $post_ids = array();
+  foreach( $popular as $p){
+    $post_ids[] = $p->ID;
   }
-  // $posts = query_posts('showposts=' . $postCount);
-  print_r( $posts );
-  die();
+  $args = array( 'post_in' => $post_ids );
+  $posts  = get_posts( $args );
+  $p_description = trim( strip_tags( $post->post_content ) );
   header('Content-Type: '.feed_content_type('rss-http').'; charset='.get_option('blog_charset'), true);
   echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>';
   ?>
@@ -674,19 +669,31 @@ function rss_most_popular(){
       <sy:updatePeriod><?php echo apply_filters( 'rss_update_period', 'hourly' ); ?></sy:updatePeriod>
       <sy:updateFrequency><?php echo apply_filters( 'rss_update_frequency', '1' ); ?></sy:updateFrequency>
       <?php do_action('rss2_head'); ?>
-      <?php while(have_posts()) : the_post(); ?>
+      <?php foreach( $posts as $post){ ?>
+        <?php // print_r($post); ?>
         <item>
-          <title><?php the_title_rss(); ?></title>
-          <link><?php the_permalink_rss(); ?></link>
-          <pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', get_post_time('Y-m-d H:i:s', true), false); ?></pubDate>
-          <dc:creator><?php the_author(); ?></dc:creator>
-          <guid isPermaLink="false"><?php the_guid(); ?></guid>
-          <description><![CDATA[<?php the_excerpt_rss() ?>]]></description>
-          <content:encoded><![CDATA[<?php the_excerpt_rss() ?>]]></content:encoded>
-          <?php rss_enclosure(); ?>
-          <?php do_action('rss2_item'); ?>
+          <title><?php echo $post->post_title; ?>aa</title>
+          <link><?php echo $post->guid; ?></link>
+          <pubDate><?php echo $post->post_date; ?></pubDate>
+          <dc:creator><?php echo get_the_author_meta('display_name', $post->post_author); ?></dc:creator>
+          <guid isPermaLink="false"><?php echo $post->guid; ?></guid>
+          <description><![CDATA[<?php echo $p_description; ?>]]></description>
+          <content:encoded><![CDATA[<?php echo $p_description; ?>]]></content:encoded>
+          <?php rss_enclosure($post); ?>
+          <?php
+            $thumbnail_size = apply_filters( 'rss_enclosure_image_size', 'thumbnail' );
+            $thumbnail_id   = get_post_thumbnail_id( $post->ID );
+            $thumbnail      = wp_get_attachment_image_src( $thumbnail_id, 'full' );          
+            printf( 
+              '<enclosure name="featured_image" url="%s" length="%s" type="%s" />',
+              $thumbnail[0], 
+              filesize( path_join( $upload_dir['basedir'], $thumbnail['path'] ) ), 
+              get_post_mime_type( $thumbnail_id ) 
+          );
+          ?>
+          <enclosure name="featured_image" url="%s" length="%s" type="%s" />
         </item>
-      <?php endwhile; ?>
+      <?php } ?>
     </channel>
     </rss>
   <?php    
