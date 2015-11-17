@@ -610,7 +610,7 @@ class WpBooj {
           }
         ?>
       </script>
-      <?      
+      <?php
     }
   }
 
