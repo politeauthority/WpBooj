@@ -40,20 +40,18 @@ class WpBoojAdmin {
   }
 
   public function booj_branding(){
-    if( substr( get_bloginfo('version'), 0, 1 ) == '3' ){
-      ?>
-      <style type="text/css">
-        #footer-upgrade{
-          display: none;
-        }
-        #wpfooter{
-          background-image: url('<?php print get_site_url(); ?>/wp-content/plugins/WpBooj/logo-enterprise-network.gif');
-          background-repeat: no-repeat;
-          background-position: right;
-        }
-      </style>
-      <?php
-    }
+    ?>
+    <style type="text/css">
+      #footer-upgrade{
+        display: none;
+      }
+/*      #wpfooter{
+        background-image: url('<?php print get_site_url(); ?>/wp-content/plugins/WpBooj/enterprise_logo.jpg');
+        background-repeat: no-repeat;
+        background-position: right;
+      }*/
+    </style>
+    <?php
   }
 
   /***********************************************************                                                          
@@ -441,10 +439,10 @@ class WpBoojAdmin {
       if( $user->data->user_login != 'booj' &&  $user->data->user_login != 'admin' ){
         ?>
         <style type="text/css">
-          #menu-links { display: none; }
-          #menu-appearance { display: none; }
-          #menu-plugins { display: none; }
-          #toplevel_page_itsec { display: none; }
+          #menu-links, #menu-plugins, #menu-settings, 
+          #menu-tools, #menu-appearance, #toplevel_page_itsec,
+          .toplevel_page_amazon-web-services 
+          { display: none;}          
         </style>
         <?php
       }
