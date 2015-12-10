@@ -3,10 +3,10 @@
 Plugin Name: WpBooj
 Plugin URI: https://github.com/politeauthority/WpBooj/
 Description: Booj plugin. Extendeds Wordpress in many wonderful ways!
-Version: 1.9.1
+Version: 1.9.4
 Author: Alix Fullerton
 Author URI: http://www.booj.com/
-Release Date: 2015-10-13
+Release Date: 2015-11-09
 
 
 This version currently supports; 

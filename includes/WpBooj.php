@@ -88,19 +88,27 @@ class WpBooj {
       $headers         = apache_request_headers();
       $blog_url        = get_bloginfo( 'wpurl' );
       $blog_url_strip  = str_replace( array( 'http://', 'www'), '', $blog_url );
-      $rebranded = ( isset($headers['X-Forwarded-Host'] ) && $headers['X-Forwarded-Host'] != $blog_url_strip ) ? $headers['X-Forwarded-Host'] : false  ;
+      if( isset($headers['X-Forwarded-Host'] ) && $headers['X-Forwarded-Host'] != $blog_url_strip ){
+        $rebranded = $headers['X-Forwarded-Host'];
+      } elseif( $_SERVER['HTTP_HOST'] != $blog_url_strip ){
+        $rebranded = $_SERVER['HTTP_HOST'];
+      } else {
+        $rebranded = False;
+      }
       if( $rebranded && $WpBooj_options['proxy_admin_urls'] == 'on' ){
-        $rebranded .= '/blog/';
+        if($rebranded != 'thelocallantern.com'){
+          $rebranded .= '/blog/';          
+        }
       } elseif ( $rebranded ){
         $rebranded .= '/';
       }
       if( $rebranded ){
         $rebranded = 'http://' . $rebranded;
         return array( $rebranded, True );
-      }
+     }
     }
     return array( $blog_url, False );
-  }
+   }
 
   public function redirect_activeclients(){
     /***
