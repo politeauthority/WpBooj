@@ -110,7 +110,8 @@ class WpBooj {
     global $WpBooj_options;
     if( 
       $WpBooj_options['proxy_admin_urls'] == 'on' && 
-      ! isset( $_SERVER['HTTP_X_FORWARDED_HOST'] )
+      ! isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) &&
+      $WpBooj_options['relative_urls'] != 'on'
       )
     {
       header( 'Location: ' . get_site_url() . '/' );   
