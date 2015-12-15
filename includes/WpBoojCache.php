@@ -56,7 +56,7 @@ class WpBoojCache {
 			$data      : array( ) info to be stored
 	*/
 	public static function store( $post_id, $cache_type, $data ){
-		$data = mysql_real_escape_string( serialize( $data ) ); 
+		$data = esc_sql( serialize( $data ) ); 
 		global $wpdb;
 		// check if an old cache exists to overwrite
 		$sql = "SELECT * FROM {$wpdb->prefix}WpBoojCache WHERE 
