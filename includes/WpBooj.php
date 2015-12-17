@@ -95,7 +95,7 @@ class WpBooj {
       } else {
         $rebranded = False;
       }
-      if( $rebranded && $WpBooj_options['proxy_admin_urls'] == 'on' ){
+      if( $rebranded ){
         if($rebranded != 'thelocallantern.com'){
           $rebranded .= '/blog/';          
         }
