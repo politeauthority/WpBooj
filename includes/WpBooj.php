@@ -623,6 +623,15 @@ class WpBooj {
     }
   }
 
+  public static function exceprt( $post ){
+    if($post->post_excerpt != ''){
+      $content =  $post->post_excerpt;
+    } else {
+      $content = $post->post_content;
+    }
+    return $content;
+  }
+
 }
 
 /* ENDFILE: includes/WpBooj.php */
